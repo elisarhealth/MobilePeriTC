@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.agyohora.mobileperitc.userInterface.MyActivity"
+    tools:layout_editor_absoluteY="81dp"
+    tools:layout_editor_absoluteX="0dp">
+
+    <TextView
+        android:id="@+id/SetUpTest_Name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name"
+        android:textSize="18sp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="35dp"
+        app:layout_constraintRight_toLeftOf="@+id/pi_patientName"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <TextView
+        android:id="@+id/SetupTest_Age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Age"
+        android:textSize="18sp"
+        android:layout_marginTop="51dp"
+        app:layout_constraintTop_toBottomOf="@+id/SetUpTest_Name"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/pi_patientAge"
+        android:layout_marginRight="8dp"
+        app:layout_constraintHorizontal_bias="0.429" />
+
+    <TextView
+        android:id="@+id/SetupTest_Sex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sex"
+        android:textSize="18sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="52dp"
+        app:layout_constraintTop_toBottomOf="@+id/SetupTest_Age"
+        app:layout_constraintRight_toLeftOf="@+id/pi_patientSex"
+        app:layout_constraintHorizontal_bias="0.422"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp" />
+
+    <TextView
+        android:id="@+id/SetupTestEye"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Eye"
+        android:textSize="18sp"
+        android:layout_marginTop="41dp"
+        app:layout_constraintTop_toBottomOf="@+id/SetupTest_Sex"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/pi_testEye"
+        android:layout_marginRight="8dp"
+        app:layout_constraintHorizontal_bias="0.418" />
+
+    <TextView
+        android:id="@+id/SetupTest_Test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Test Type"
+        android:textSize="18sp"
+        android:layout_marginTop="42dp"
+        app:layout_constraintTop_toBottomOf="@+id/SetupTestEye"
+        app:layout_constraintRight_toLeftOf="@+id/pi_testType"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintHorizontal_bias="0.753" />
+
+    <EditText
+        android:id="@+id/pi_patientName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName|textCapWords"
+        android:hint = "Enter Patient Name"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/SetUpTest_Name"
+        app:layout_constraintTop_toTopOf="@+id/SetUpTest_Name"
+        android:layout_marginRight="16dp"
+        app:layout_constraintVertical_bias="0.476"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginEnd="8dp" />
+
+    <EditText
+        android:id="@+id/pi_patientAge"
+        android:layout_width="wrap_content"
+        android:layout_height="43dp"
+        android:ems="10"
+        android:inputType="number"
+        android:hint="Enter Patient Age"
+        app:layout_constraintBottom_toBottomOf="@+id/SetupTest_Age"
+        app:layout_constraintTop_toTopOf="@+id/SetupTest_Age"
+        app:layout_constraintVertical_bias="0.523"
+        app:layout_constraintRight_toRightOf="@+id/pi_patientName"
+        app:layout_constraintLeft_toLeftOf="@+id/pi_patientName" />
+
+    <Spinner
+        android:id="@+id/pi_patientSex"
+        android:layout_width="0dp"
+        android:layout_height="24dp"
+        android:entries="@array/sexChoices"
+        app:layout_constraintBottom_toBottomOf="@+id/SetupTest_Sex"
+        app:layout_constraintTop_toTopOf="@+id/SetupTest_Sex"
+        app:layout_constraintRight_toRightOf="@+id/pi_patientAge"
+        app:layout_constraintLeft_toLeftOf="@+id/pi_patientAge" />
+
+    <Spinner
+        android:id="@+id/pi_testEye"
+        android:layout_width="0dp"
+        android:layout_height="24dp"
+        android:entries="@array/eyeChoices"
+        app:layout_constraintBottom_toBottomOf="@+id/SetupTestEye"
+        app:layout_constraintTop_toTopOf="@+id/SetupTestEye"
+        app:layout_constraintRight_toRightOf="@+id/pi_patientSex"
+        app:layout_constraintLeft_toLeftOf="@+id/pi_patientSex" />
+
+    <Spinner
+        android:id="@+id/pi_testType"
+        android:layout_width="0dp"
+        android:layout_height="24dp"
+        android:entries="@array/testTypeChoices"
+        app:layout_constraintRight_toRightOf="@+id/pi_testEye"
+        app:layout_constraintLeft_toLeftOf="@+id/pi_testEye"
+        app:layout_constraintBottom_toBottomOf="@+id/SetupTest_Test"
+        app:layout_constraintTop_toTopOf="@+id/SetupTest_Test" />
+
+    <Button
+        android:id="@+id/pi_registerTest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="50dp"
+        android:onClick="clickCallback"
+        android:text="Register Test"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pi_testType" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline"
+        app:layout_constraintGuide_begin="16dp"
+        android:orientation="vertical" />
+
+</android.support.constraint.ConstraintLayout>
