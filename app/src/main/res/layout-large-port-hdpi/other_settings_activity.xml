@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:ignore="MissingDefaultResource">
+
+    <LinearLayout
+        android:id="@+id/progressBar"
+        android:layout_width="400dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="61dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="4"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_weight="1"
+            android:id="@+id/stepOne"
+            android:background="@drawable/progress_bar_grey"
+            android:clickable="false" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_weight="0.5"
+            android:clickable="false" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_weight="1"
+            android:id="@+id/stepTwo"
+            android:background="@drawable/progress_bar_grey"
+            android:clickable="false" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_weight="0.5" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_weight="1"
+            android:id="@+id/stepThree"
+            android:background="@drawable/progress_bar_grey"
+            android:clickable="false" />
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="150dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/transparent_bg"
+            android:animateLayoutChanges="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/add_wireless_network_card"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="10dp"
+
+                android:layout_marginEnd="10dp"
+                android:onClick="animateCard"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center|start"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="35dp"
+                        android:gravity="center"
+                        android:contentDescription="@string/imageDescription"
+                        android:background="@drawable/ic_wifi" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="22dp"
+                        android:gravity="center"
+                        android:text="@string/add_wireless_network"
+                        android:textColor="@color/primaryTwo"
+                        android:textSize="28sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/add_wireless_network_card_options"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:visibility="gone"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:elevation="0dp"
+                app:cardPreventCornerOverlap="false">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:background="@color/light_grey"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/wireless_skip"
+                        android:layout_width="158dp"
+                        android:layout_height="40dp"
+                        android:onClick="settingsClickCallback"
+                        android:layout_marginStart="100dp"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:background="@drawable/gradient_orange_button"
+                        android:text="@string/skip"
+                        android:textSize="18sp"
+                        android:textColor="@color/white" />
+
+                    <Button
+                        android:id="@+id/wireless_go"
+                        android:layout_width="158dp"
+                        android:layout_height="40dp"
+                        android:onClick="settingsClickCallback"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_marginStart="20dp"
+                        android:background="@drawable/gradient_blue_button"
+                        android:text="@string/go"
+                        android:textSize="18sp"
+                        android:textColor="@color/white" />
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/add_email_account_card"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+
+                android:onClick="animateCard"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center|start"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="35dp"
+                        android:gravity="center"
+                        android:background="@drawable/ic_email"
+                        android:contentDescription="@string/imageDescription" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="22dp"
+                        android:gravity="center"
+                        android:text="@string/add_email_account"
+                        android:textColor="@color/primaryTwo"
+                        android:textSize="28sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/add_email_account_card_options"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:visibility="gone"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:background="@color/light_grey"
+                android:elevation="0dp"
+                app:cardPreventCornerOverlap="false">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:background="@color/light_grey"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/email_skip"
+                        android:layout_width="158dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="100dp"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:onClick="settingsClickCallback"
+                        android:background="@drawable/gradient_orange_button"
+                        android:text="@string/skip"
+                        android:textSize="18sp"
+                        android:textColor="@color/white" />
+
+                    <Button
+                        android:id="@+id/email_go"
+                        android:layout_width="158dp"
+                        android:layout_height="40dp"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_marginStart="20dp"
+                        android:background="@drawable/gradient_blue_button"
+                        android:text="@string/go"
+                        android:onClick="settingsClickCallback"
+                        android:textSize="18sp"
+                        android:textColor="@color/white" />
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/add_printer_card"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+
+                android:onClick="animateCard"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center|start"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="35dp"
+                        android:gravity="center"
+                        android:background="@drawable/ic_print"
+                        android:contentDescription="@string/imageDescription" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="22dp"
+                        android:gravity="center"
+                        android:text="@string/add_printer"
+                        android:textColor="@color/primaryTwo"
+                        android:textSize="28sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/add_wired_printer_card_options"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:visibility="gone"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="15dp"
+                android:background="@color/light_grey"
+                android:elevation="0dp"
+                app:cardPreventCornerOverlap="false">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:background="@color/light_grey"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/wired_printer_skip"
+                        android:layout_width="158dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="100dp"
+                        android:onClick="settingsClickCallback"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:background="@drawable/gradient_orange_button"
+                        android:text="@string/skip"
+                        android:textSize="18sp"
+                        android:textColor="@color/white" />
+
+                    <Button
+                        android:id="@+id/wired_printer_go"
+                        android:layout_width="158dp"
+                        android:layout_height="40dp"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_marginStart="20dp"
+                        android:onClick="settingsClickCallback"
+                        android:background="@drawable/gradient_blue_button"
+                        android:text="@string/go"
+                        android:textSize="18sp"
+                        android:textColor="@color/white" />
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="50dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

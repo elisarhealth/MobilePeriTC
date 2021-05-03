@@ -12,28 +12,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="228dp"
+        android:layout_marginTop="50dp"
         android:layout_marginEnd="227dp"
-        android:layout_marginBottom="53dp"
         android:text="Admin Profile"
         android:textColor="@color/white"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/profileIcon"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <ImageView
         android:id="@+id/profileIcon"
-        android:layout_width="350dp"
-        android:layout_height="350dp"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
         android:layout_marginTop="50dp"
-        android:layout_marginBottom="400dp"
         android:contentDescription="@string/vr_man"
         android:src="@drawable/baseline_admin_panel_settings_white_48"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+        app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
     <Button
         android:id="@+id/change_admin_password_by_admin"
@@ -85,6 +83,20 @@
         app:layout_constraintTop_toBottomOf="@+id/change_user_password_by_admin" />
 
     <Button
+        android:id="@+id/restore_database"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="50dp"
+        android:background="@drawable/new_ripple_effect"
+        android:onClick="profileSettings"
+        android:text="Restore Database"
+        android:textColor="@color/white"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switch_from_admin_to_user" />
+
+    <Button
         android:id="@+id/logout_admin_profile"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
@@ -96,7 +108,7 @@
         android:textColor="@color/primaryOne"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/switch_from_admin_to_user" />
+        app:layout_constraintTop_toBottomOf="@+id/restore_database" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

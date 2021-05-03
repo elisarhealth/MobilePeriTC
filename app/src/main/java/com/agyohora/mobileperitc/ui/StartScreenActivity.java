@@ -1,13 +1,18 @@
 package com.agyohora.mobileperitc.ui;
 
+import android.Manifest;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -19,6 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.agyohora.mobileperitc.BuildConfig;
 import com.agyohora.mobileperitc.DeviceAdminReceiver;
@@ -47,6 +53,15 @@ public class StartScreenActivity extends AppCompatActivity {
 
     private DevicePolicyManager mDevicePolicyManager;
     private ComponentName mAdminComponentName;
+    int PERMISSION_ALL = 1;
+    static final int MY_PERMISSIONS_MANAGE_WRITE_SETTINGS = 100;
+    private boolean mSettingPermission = true;
+    String[] PERMISSIONS = {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_CONTACTS,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_CONTACTS
+    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,11 +79,18 @@ public class StartScreenActivity extends AppCompatActivity {
         MyApplication.getInstance().set_HMD_CONNECTION_NEED(true);
         String copyright = "\u00a9 Elisar Life Sciences Private Limited. " + CommonUtils.currentYear();
         ((TextView) findViewById(R.id.copyRights)).setText(copyright);
+
+        if (!hasPermissions(this, PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+        }
+       // CommonUtils.sendSMS(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        showWritePermissionSettings();
+        settingPermission();
         //CommonUtils.setInMemoryRoomDatabases();`
         /*DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -129,11 +151,45 @@ public class StartScreenActivity extends AppCompatActivity {
         getApplicationContext().startActivity(intent);
     }
 
+    private boolean showWritePermissionSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            if (!Settings.System.canWrite(this)) {
+                Log.v("DANG", " " + !Settings.System.canWrite(this));
+                Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                intent.setData(Uri.parse("package:" + this.getPackageName()));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                this.startActivity(intent);
+                return false;
+            }
+        }
+        return true; //Permission already given
+    }
+
+    private void settingPermission() {
+        mSettingPermission = true;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.System.canWrite(getApplicationContext())) {
+                mSettingPermission = false;
+                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, MY_PERMISSIONS_MANAGE_WRITE_SETTINGS);
+            }
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RESULT_FIRST_USER) {
             startBarCodeActivity();
+        } else if (requestCode == MY_PERMISSIONS_MANAGE_WRITE_SETTINGS) {
+            if (resultCode == RESULT_OK) {
+                mSettingPermission = true;
+                startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:your.application.package")));
+            } else {
+                settingPermission();
+            }
         }
         try {
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -181,6 +237,17 @@ public class StartScreenActivity extends AppCompatActivity {
             Log.e("Exception", " " + e.getMessage());
             invalidQrDialog("The QR Code u have scanned is not been sent by us.");
         }
+    }
+
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private boolean isQrContainsValidParams(AppPreferencesHelper appPreferencesHelper, JSONObject retrievedData) {

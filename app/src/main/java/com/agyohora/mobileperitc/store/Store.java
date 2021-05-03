@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -109,6 +110,7 @@ public class Store {
     public static String calibrationRecalibration = "Calibrate";
     public static String toastMessage = null;
     public static int tipId = 0;
+    public static int recordsInserted = 0, recordMismatched = 0, recordsDuplicated = 0, totalNumberOfRecords = 0;
     public static boolean showTip = false;
     public static boolean isCommInitializationOver = false;
     public static boolean communicationActive = false;
@@ -368,6 +370,11 @@ public class Store {
                 RuntimeMode.modeNo = 2;
                 activeView_number = R.layout.activity_ipd_settings;
                 StoreTransmitter.updatedUIState("ACTION_BACK_TO_IPD_SETTINGS");
+                break;
+
+            case Actions.ACTION_OPEN_HMD_SYNC:
+                activeView_number = R.layout.hmd_sync_check_activity;
+                StoreTransmitter.updatedUIState("ACTION_OPEN_HMD_SYNC");
                 break;
 
             case Actions.ACTION_COMMUNICATION_CONTINUE:
@@ -730,6 +737,20 @@ public class Store {
                 calibrationStatus = "Calibration is done";
                 calibrationSaveProceedVisibility = View.VISIBLE;
                 StoreTransmitter.updatedUIState("ACTION_CALIBRATION_DONE");
+                break;
+
+            case Actions.ACTION_UPDATE_PRB:
+
+                buttonClickData.buttonData = "" + new AppPreferencesHelper(applicationContext, DEVICE_PREF).getPRBCount();
+                buttonClickData.buttonName = "PRB_Update";
+                clickData.putString("onPass", "PrbUpdatePass");
+                clickData.putString("onFail", "PrbUpdateFail");
+                sentData = gson.toJson(buttonClickData);
+                clickData.putInt("hashcode", sentData.hashCode());
+                clickData.putString("data", sentData);
+                if (communicationActive) {
+                    StoreTransmitter.doCommFunction(StoreTransmitter.COMM_FUNCTION_CLICKONTC, clickData);
+                }
                 break;
 
             case Actions.ACTION_START_UPDATE_TRANSFER:
@@ -1351,6 +1372,52 @@ public class Store {
                 activeView_number = R.layout.download_update_screen;
                 StoreTransmitter.updatedUIState("ACTION_START_DOWNLOAD_UPDATES");
                 break;
+            case Actions.ACTION_START_DATABASE_RESTORE:
+                activeView_number = R.layout.checking_for_database_in_remote;
+                StoreTransmitter.updatedUIState("ACTION_START_DATABASE_RESTORE");
+                break;
+            case Actions.ACTION_DATABASE_RESTORE_AVAILABLE:
+                activeView_number = R.layout.database_restore_available;
+                StoreTransmitter.updatedUIState("ACTION_DATABASE_RESTORE_AVAILABLE");
+                break;
+            case Actions.ACTION_START_DATABASE_DOWNLOAD:
+                activeView_number = R.layout.download_database;
+                StoreTransmitter.updatedUIState("ACTION_START_DATABASE_MERGING");
+                break;
+            case Actions.ACTION_START_DATABASE_MERGING:
+                activeView_number = R.layout.merging_database;
+                StoreTransmitter.updatedUIState("ACTION_START_DATABASE_MERGING");
+                break;
+            case Actions.ACTION_UPLOAD_DATABASE_RESTORE_LOGS:
+                Log.e("DATABASE_RESTORE_LOG", "called");
+                String d = (String) actionData;
+                String[] flags = d.split(" ");
+                Log.e("flags", "Length " + flags.length);
+                recordsInserted = Integer.parseInt(flags[0]);
+                recordMismatched = Integer.parseInt(flags[1]);
+                recordsDuplicated = Integer.parseInt(flags[2]);
+                totalNumberOfRecords = Integer.parseInt(flags[3]);
+                activeView_number = R.layout.uploading_database_restore_logs;
+                Log.e("DATABASE_RESTORE_LOG", "recordsInserted " + recordsInserted + " recordMismatched " + recordMismatched + " recordsDuplicated " + recordsDuplicated + " totalNumberOfRecords " + totalNumberOfRecords);
+                StoreTransmitter.updatedUIState("ACTION_UPLOAD_DATABASE_RESTORE_LOGS");
+                break;
+            case Actions.ACTION_FINISH_DATABASE_RESTORE:
+                Log.e("FINISH_DATABASE_RESTORE", "called");
+                String d1 = (String) actionData;
+                String[] flags1 = d1.split(" ");
+                Log.e("flags1", "Length " + flags1.length);
+                recordsInserted = Integer.parseInt(flags1[0]);
+                recordMismatched = Integer.parseInt(flags1[1]);
+                recordsDuplicated = Integer.parseInt(flags1[2]);
+                totalNumberOfRecords = Integer.parseInt(flags1[3]);
+                activeView_number = R.layout.restore_database_finished;
+                Log.e("FINISH_DATABASE_RESTORE", "recordsInserted " + recordsInserted + " recordMismatched " + recordMismatched + " recordsDuplicated " + recordsDuplicated + " totalNumberOfRecords " + totalNumberOfRecords);
+                StoreTransmitter.updatedUIState("ACTION_FINISH_DATABASE_RESTORE");
+                break;
+            case Actions.ACTION_FINISH_DATABASE_RESTORE_WITHOUT_DATA:
+                activeView_number = R.layout.restore_database_finished;
+                StoreTransmitter.updatedUIState("ACTION_FINISH_DATABASE_RESTORE");
+                break;
             case Actions.ACTION_HMD_UPDATE_DON_START_TC_UPDATE:
                 activeView_number = R.layout.installing_test_controller;
                 StoreTransmitter.updatedUIState("ACTION_HMD_UPDATE_DON_START_TC_UPDATE");
@@ -1441,6 +1508,21 @@ public class Store {
                 }
                 StoreTransmitter.updatedUIState("ACTION_UNPAUSE_TEST");
                 break;
+        }
+    }
+
+    private static void sendProductionSetUpStatus() {
+        Log.e("sendProductionSetUpStatus", "called");
+        AppPreferencesHelper appPreferencesHelper = new AppPreferencesHelper(MyApplication.getInstance(), DEVICE_PREF);
+        buttonClickData.buttonName = "ProductionSetupStatus";
+        buttonClickData.buttonData = "" + appPreferencesHelper.getProductionSetUpStatus();
+        clickData.putString("onPass", "ProductionSetupStatusPass");
+        clickData.putString("onFail", "ProductionSetupStatusFail");
+        sentData = gson.toJson(buttonClickData);
+        clickData.putInt("hashcode", sentData.hashCode());
+        clickData.putString("data", sentData);
+        if (communicationActive) {
+            StoreTransmitter.doCommFunction(StoreTransmitter.COMM_FUNCTION_CLICKONTC, clickData);
         }
     }
 
@@ -1669,6 +1751,14 @@ public class Store {
                         showBatteryStatus(MainActivity.dialogReference, data, batLevel);
                     else
                         StoreTransmitter.updatedUIState("HMD_BATTERY_LEVEL");
+                    sendProductionSetUpStatus();
+                    break;
+                case "PRB_COUNT":
+                    try {
+                        CommonUtils.setPRBCount(Integer.parseInt(data));
+                    } catch (Exception e) {
+                        Log.e("Exception", "PRB_COUNT " + e.getMessage());
+                    }
                     break;
                 case "HMD_CAMERA_AB_VALUE":
                     try {
@@ -1876,6 +1966,7 @@ public class Store {
                     Actions.beginEiComponentFailure();
                     break;
                 case "START_IPD":
+                    sendProductionSetUpStatus();
                     Log.d("InTag", "START_IPD");
                     //CommunicationService.videoFrame = null;
                     if (activeView_number == R.layout.activity_waitscreen_ipd_live_feed) {
@@ -2151,6 +2242,12 @@ public class Store {
 
         switch (activeView_number) {
 
+            case R.layout.restore_database_finished:
+                stateBundle.putInt("recordMismatched", recordMismatched);
+                stateBundle.putInt("recordsInserted", recordsInserted);
+                stateBundle.putInt("recordsDuplicated", recordsDuplicated);
+                stateBundle.putInt("totalNumberOfRecords", totalNumberOfRecords);
+                break;
             case R.layout.activity_pre_production:
                 stateBundle.putString("calibData", calibData);
                 break;
@@ -2507,8 +2604,8 @@ public class Store {
                 });
 
         androidx.appcompat.app.AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
     }
 
     private static void showBatteryStatus(Context context, String hmdBatteryLevel, int tcBatteryLevel) {

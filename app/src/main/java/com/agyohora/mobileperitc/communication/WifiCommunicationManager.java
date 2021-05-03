@@ -2,30 +2,43 @@ package com.agyohora.mobileperitc.communication;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.agyohora.mobileperitc.myapplication.MyApplication;
 import com.agyohora.mobileperitc.store.Store;
 import com.agyohora.mobileperitc.utils.CommonUtils;
+import com.android.dx.stock.ProxyBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static java.lang.Thread.sleep;
 
 /**
  * Created by Raviteja Chivukula on 11-02-2018.
@@ -138,6 +151,8 @@ public class WifiCommunicationManager {
     private boolean startComm = false;
     private boolean stopComm = false;
     public static boolean commInitialized = false;
+    private static ConnectivityManager mConnectivityManager;
+    private WifiManager wifiManager;
 
     //The list below has to be static, as it will be shared between multiple threads.
     private static List<String> txPacketBuffer = Collections.synchronizedList(new ArrayList<String>(100));
@@ -481,7 +496,7 @@ public class WifiCommunicationManager {
          // Check this post for details: https://android.stackexchange.com/questions/46499/how-configure-the-dhcp-settings-of-wifi-tetheringhotspot-in-android
         return "192.168.43." + lastSubnet_string;*/
 
-       return CommonUtils.getDetailsFromSerialNumber(hmdSerialId,"StaticIP");
+        return CommonUtils.getDetailsFromSerialNumber(hmdSerialId,"StaticIP");
     }
 
     private StateResult receiveBytes() {
@@ -496,7 +511,7 @@ public class WifiCommunicationManager {
                     byte[] rxBytes = new byte[noOfBytesRead];
                     System.arraycopy(rxBytesBuffer, 0, rxBytes, 0, rxBytes.length);
                     String rxByteString = new String(rxBytes);
-                   // Log.d("rxByteString"," "+rxByteString);
+                    // Log.d("rxByteString"," "+rxByteString);
                     rxByteStringRemaining = rxByteStringRemaining + rxByteString;
 
                     return StateResult.RECEIVED_BYTES_NON_ZERO;
@@ -915,7 +930,7 @@ public class WifiCommunicationManager {
         String HMD_IP = getHmdStaticIpFromSerialId(serial);
         Log.e(TAG, "WifiCommunicationStateMachine: HMD_IP Computed from Serial ID = " + HMD_IP);
         //Get a reference to the wifiManager. This is a common reference used by multiple methods
-        WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+        wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
 
         StateResult currentStateResult = StateResult.START_CMD_NOT_RECEIVED;
         StateResult previousStateResult = StateResult.ERROR_TRANSIENT;
@@ -966,8 +981,12 @@ public class WifiCommunicationManager {
 
                 case HOST_HOTSPOT_WIFI: {
 
-                    currentStateResult = hostHotspotWifi(moduleMainContext, wifiManager, hotspotWifiSsid, hotspotWifiPassword);
-
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                        currentStateResult = hostHotspotWifiBelowOreo(moduleMainContext, wifiManager, hotspotWifiSsid, hotspotWifiPassword);
+                    } else {
+                        currentStateResult = hostHotspotWifiAboveOreo(moduleMainContext, wifiManager);
+                    }
+                    Log.e("currentStateResult", " " + currentStateResult);
                     if (currentStateResult == StateResult.HOTSPOT_WIFI_HOSTING_SUCCESSFUL) {
                         nextState = State.ATTEMPT_SOCKET_CONNECT;
                     } else if (currentStateResult == StateResult.HOTSPOT_WIFI_HOSTING_FAILED) {
@@ -1139,6 +1158,241 @@ public class WifiCommunicationManager {
         }
 
     }
+
+    private StateResult hostHotspotWifiBelowOreo(Context context, WifiManager wifiManager, String hotspotWifiSsid, String hotspotWifiPassword) {
+
+        //Build Wifi hotspot configuration
+        hotspotWifiSsid = deviceSerialId; // Double quotation marks are not needed for the SSID while setting the hotspot's SSID
+        //hotspotWifiPassword = "\"" + "agyohora" + "\"";
+        hotspotWifiPassword = "agyohora";//TODO: Don't know whether double quotation marks are needed here
+        WifiConfiguration hotspotConfiguration = new WifiConfiguration();
+        hotspotConfiguration.SSID = hotspotWifiSsid;
+        hotspotConfiguration.preSharedKey = hotspotWifiPassword;
+        hotspotConfiguration.allowedKeyManagement.set(4);
+
+
+        int currentVersion = Build.VERSION.SDK_INT;
+        Log.d(TAG, "hostHotspotWifi: Android Version = " + currentVersion);
+
+        if (currentVersion <= 23) {
+            //Android API version corresponds to lesser than Nougat
+            //So programmatic hotspot turning on will work
+
+
+            if (!isHotspotOn(context)) {
+                try {
+
+                    Log.d(TAG, "hostHotspotWifi: Trying to switch on hotspot as it is not on yet");
+
+                    Method method = wifiManager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
+                    method.invoke(wifiManager, hotspotConfiguration, true);
+
+                    long startTime = SystemClock.elapsedRealtime();
+                    while (SystemClock.elapsedRealtime() < startTime + HOTSPOT_ENABLE_WAIT_MILLIS) {
+                        if (isHotspotOn(context)) {
+                            return StateResult.HOTSPOT_WIFI_HOSTING_SUCCESSFUL;
+                        } else {
+                            sleep(100);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.d(TAG, "hostHotspotWifi: Error occurred in invoking method : " + e.getMessage());
+                }
+            } else {
+                //Hotspot is already on
+                return StateResult.HOTSPOT_WIFI_HOSTING_SUCCESSFUL;
+            }
+
+        } else {
+            //Android API version corresponds to Nougat and above
+            //So programmatic hotspot turning will not work.
+
+            //TODO: Intent to open the settings window here and wait till the hotspot is switched on
+
+            return StateResult.HOTSPOT_WIFI_HOSTING_SUCCESSFUL;
+
+        }
+
+        return StateResult.HOTSPOT_WIFI_HOSTING_FAILED;
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private StateResult hostHotspotWifiAboveOreo(Context context, WifiManager mWifiManager) {
+        /*WifiConfiguration configuration = getCustomConfigs(mWifiManager, deviceSerialId, "agyohora");
+        try {
+            Method setConfigMethod =
+                    wifiManager.getClass()
+                            .getMethod("setWifiApConfiguration", WifiConfiguration.class);
+            boolean status = (boolean) setConfigMethod.invoke(wifiManager, configuration);
+            Log.e("TrackThis", "setWifiApConfiguration status " + status);
+        } catch (Exception e) {
+            Log.e("TrackThis", "setWifiApConfiguration " + e.getMessage());
+        }*/
+
+        MyOnStartTetheringCallback callback = new MyOnStartTetheringCallback() {
+            @Override
+            public void onTetheringStarted() {
+                Log.e("hostHotspotWifi", " onTetheringStarted");
+            }
+
+            @Override
+            public void onTetheringFailed() {
+                Log.e("hostHotspotWifi", " onTetheringFailed");
+            }
+        };
+        boolean flag = startTethering(callback, context);
+        Log.e("TrackThis", "Flag " + flag);
+        return flag ? StateResult.HOTSPOT_WIFI_HOSTING_SUCCESSFUL : StateResult.HOTSPOT_WIFI_HOSTING_FAILED;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public boolean startTethering(final MyOnStartTetheringCallback callback, Context mContext) {
+        mConnectivityManager = (ConnectivityManager) mContext.getApplicationContext().getSystemService(ConnectivityManager.class);
+        if (mConnectivityManager == null) {
+            Log.e("startTethering", "mConnectivityManager is null ");
+        }
+        // On Pie if we try to start tethering while it is already on, it will
+        // be disabled. This is needed when startTethering() is called programmatically.
+        if (isTetherActive()) {
+            Log.e("startTethering", "Tether already active, returning");
+            return true;
+        }
+
+        File outputDir = mContext.getCodeCacheDir();
+        Object proxy;
+        try {
+            proxy = ProxyBuilder.forClass(OnStartTetheringCallbackClass())
+                    .dexCache(outputDir).handler(new InvocationHandler() {
+                        @Override
+                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                            switch (method.getName()) {
+                                case "onTetheringStarted":
+                                    callback.onTetheringStarted();
+                                    break;
+                                case "onTetheringFailed":
+                                    callback.onTetheringFailed();
+                                    break;
+                                default:
+                                    ProxyBuilder.callSuper(proxy, method, args);
+                            }
+                            return null;
+                        }
+
+                    }).build();
+        } catch (Exception e) {
+            Log.e("startTethering", "Error in enableTethering ProxyBuilder " + e.getMessage());
+            return false;
+        }
+
+        Method method = null;
+        try {
+            method = mConnectivityManager.getClass().getDeclaredMethod("startTethering", int.class, boolean.class, OnStartTetheringCallbackClass(), Handler.class);
+            if (method == null) {
+                Log.e("startTethering", "startTetheringMethod is null");
+            } else {
+                method.invoke(mConnectivityManager, ConnectivityManager.TYPE_MOBILE, false, proxy, null);
+                Log.e("startTethering", "startTethering invoked");
+            }
+            return true;
+        } catch (Exception e) {
+            Log.e("startTethering", "Error in enableTethering " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean isTetherActive() {
+        try {
+            Method method = mConnectivityManager.getClass().getDeclaredMethod("getTetheredIfaces");
+            if (method == null) {
+                Log.e("startTethering", "getTetheredIfaces is null");
+            } else {
+                String[] res = (String[]) method.invoke(mConnectivityManager, (Object) null);
+                Log.e("startTethering", "getTetheredIfaces invoked");
+                Log.e("startTethering", Arrays.toString(res));
+                if (res.length > 0) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            Log.e("startTethering", "Error in getTetheredIfaces " + e.getMessage());
+        }
+        return false;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public static void stopTethering(Context mContext) {
+        try {
+            ConnectivityManager mConnectivityManager = (ConnectivityManager) mContext.getApplicationContext().getSystemService(ConnectivityManager.class);
+            Method method = mConnectivityManager.getClass().getDeclaredMethod("stopTethering", int.class);
+            if (method == null) {
+                Log.e(TAG, "stopTetheringMethod is null");
+            } else {
+                method.invoke(mConnectivityManager, ConnectivityManager.TYPE_MOBILE);
+                Log.d(TAG, "stopTethering invoked");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "stopTethering error: " + e.toString());
+            e.printStackTrace();
+        }
+    }
+
+    interface MyOnStartTetheringCallback {
+        /**
+         * Called when tethering has been successfully started.
+         */
+        public abstract void onTetheringStarted();
+
+        /**
+         * Called when starting tethering failed.
+         */
+        public abstract void onTetheringFailed();
+
+    }
+
+    private Class OnStartTetheringCallbackClass() {
+        try {
+            return Class.forName("android.net.ConnectivityManager$OnStartTetheringCallback");
+        } catch (ClassNotFoundException e) {
+            Log.e(TAG, "OnStartTetheringCallbackClass error: " + e.toString());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static WifiConfiguration getCustomConfigs(WifiManager manager, String ssid, String pass) {
+        WifiConfiguration wifiConfig = null;
+        try {
+            Method getConfigMethod = manager.getClass().getMethod("getWifiApConfiguration");
+            wifiConfig = (WifiConfiguration) getConfigMethod.invoke(manager);
+            if (!TextUtils.isEmpty(ssid))
+                wifiConfig.SSID = ssid;
+            if (!TextUtils.isEmpty(pass))
+                wifiConfig.preSharedKey = pass;
+            return wifiConfig;
+        } catch (Exception e) {
+            Log.e("TrackThis", "getCustomConfigs " + e.getMessage());
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            e.printStackTrace(new PrintStream(out));
+            String str = new String(out.toByteArray());
+            Log.e("TrackThis", "getCustomConfigs " + str);
+        }
+        if (wifiConfig == null) {
+            Log.e("TrackThis", "getCustomConfigs wifiConfig is null ");
+            wifiConfig = new WifiConfiguration();
+            if (!TextUtils.isEmpty(ssid))
+                wifiConfig.SSID = ssid;
+            if (!TextUtils.isEmpty(pass))
+                wifiConfig.preSharedKey = pass;
+            wifiConfig.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+            wifiConfig.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+            wifiConfig.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+            wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        }
+        return wifiConfig;
+    }
+
+
 
 
 }

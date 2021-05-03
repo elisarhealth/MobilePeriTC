@@ -77,8 +77,10 @@ import com.agyohora.mobileperitc.BuildConfig;
 import com.agyohora.mobileperitc.R;
 import com.agyohora.mobileperitc.actions.Actions;
 import com.agyohora.mobileperitc.asynctasks.DeleteRecord;
+import com.agyohora.mobileperitc.communication.WifiCommunicationManager;
 import com.agyohora.mobileperitc.data.database.AppDatabase;
 import com.agyohora.mobileperitc.data.database.entity.PatientTestResult;
+import com.agyohora.mobileperitc.data.network.ApiEndPoint;
 import com.agyohora.mobileperitc.data.preferences.AppPreferencesHelper;
 import com.agyohora.mobileperitc.inappupdate.InAppUpdate;
 import com.agyohora.mobileperitc.inappupdate.InAppVersion;
@@ -151,6 +153,7 @@ import static com.agyohora.mobileperitc.utils.AppConstants.PREF_NAME;
 import static com.agyohora.mobileperitc.utils.Constants.BUG_FIX_CLICK_ACK_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.BUG_FIX_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.CHRONOMETER_LOGS_FOLDER;
+import static com.agyohora.mobileperitc.utils.Constants.DATABASE_RESTORE_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.DISPLAY_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.MY_DEBUG_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.SYS_LOGS_FOLDER;
@@ -464,6 +467,21 @@ public final class CommonUtils {
         alert.show();
     }
 
+    public static void showAcknowlegmentDialog(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.myDialog));
+        builder.setTitle("Are you sure?");
+        builder.setMessage("By clicking YES, you are acknowledging that Hotpsot Name and Password is created manually.")
+                .setCancelable(false)
+                .setPositiveButton("YES", (dialog, id) -> {
+                    Actions.startHMDSync();
+                })
+                .setNegativeButton("No", (dialog, id) -> {
+                    //do things
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
     public static void deleteReportConfirmationDialog(final Context context, final Activity activity, final String resultId, final MenuItem menuItem, final boolean closeActivity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.myDialog));
         builder.setTitle("Delete Report?");
@@ -505,7 +523,8 @@ public final class CommonUtils {
                     //do nothing
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -519,7 +538,8 @@ public final class CommonUtils {
                     //do nothing
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -594,8 +614,6 @@ public final class CommonUtils {
 
     private static void stopCommAndOpenWifi(Bundle bundle, Activity activity, Context context) {
         StoreTransmitter.doCommFunction(StoreTransmitter.COMM_FUNCTION_STOP, bundle);
-        //switchOffHotSpot(context);
-        isHotSpotOn = false;
         MyApplication.getInstance().set_HMD_CONNECTION_NEED(false);
         MyApplication.getInstance().set_HMD_CONNECTED(false);
         Toast.makeText(context, "Hotspot Turned Off", Toast.LENGTH_SHORT).show();
@@ -694,30 +712,6 @@ public final class CommonUtils {
         alert.show();
     }
 
-    public static void initiatingHotSpotDialog(Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.myDialog));
-        builder.setMessage("Initiating HotSpot please wait...")
-                .setCancelable(false);
-        AlertDialog alert = builder.create();
-        alert.show();
-        new Handler().postDelayed(() -> {
-            if (alert.isShowing())
-                alert.dismiss();
-        }, 5000);
-    }
-
-    public static void turningOffHotSpotDialog(Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.myDialog));
-        builder.setMessage("Turning Off HotSpot please wait...")
-                .setCancelable(false);
-        AlertDialog alert = builder.create();
-        alert.show();
-        new Handler().postDelayed(() -> {
-            if (alert.isShowing())
-                alert.dismiss();
-        }, 5000);
-    }
-
     public static Boolean isOnline() {
         try {
             Process process = java.lang.Runtime.getRuntime().exec("ping -c 1 www.google.com");
@@ -731,24 +725,28 @@ public final class CommonUtils {
 
     public static boolean switchOffHotSpot(Context context) {
         Log.d("switchOffHotSpot", "Called");
-        WifiManager wifimanager = (WifiManager) context.getSystemService(context.WIFI_SERVICE);
-        WifiConfiguration wificonfiguration = null;
-        try {
-            Method wifi = wifimanager.getClass().getDeclaredMethod("isWifiApEnabled");
-            wifi.setAccessible(true);
-            boolean stat = (Boolean) wifi.invoke(wifimanager);
-            // if WiFi is on, turn it off
-            if (stat) {
-                wifimanager.setWifiEnabled(false);
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WifiCommunicationManager.stopTethering(context);
+        } else {
+            WifiManager wifimanager = (WifiManager) context.getSystemService(context.WIFI_SERVICE);
+            WifiConfiguration wificonfiguration = null;
+            try {
+                Method wifi = wifimanager.getClass().getDeclaredMethod("isWifiApEnabled");
+                wifi.setAccessible(true);
+                boolean stat = (Boolean) wifi.invoke(wifimanager);
+                // if WiFi is on, turn it off
+                if (stat) {
+                    wifimanager.setWifiEnabled(false);
+                }
+                Method method = wifimanager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
+                method.invoke(wifimanager, wificonfiguration, !stat);
+                commInitialized = false;
+                return true;
+            } catch (Exception e) {
+                Log.e("switchOffHotSpot", " Exception LOLLIPOP_MR1 " + e.getMessage());
             }
-            Method method = wifimanager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
-            method.invoke(wifimanager, wificonfiguration, !stat);
-            commInitialized = false;
-            Store.isHotSpotOn = false;
-            return true;
-        } catch (Exception e) {
-            Log.e("switchOffHotSpot", " Exception " + e.getMessage());
         }
+
         return false;
     }
 
@@ -769,7 +767,8 @@ public final class CommonUtils {
                 .setNegativeButton("Cancel", (dialog, id) -> {
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
 
     }
@@ -957,7 +956,8 @@ public final class CommonUtils {
                     }
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -2822,6 +2822,18 @@ public final class CommonUtils {
         return name != null ? name : "";
     }
 
+    public static String getCurrentDateTimeAsFileName(String mrn, String eye, String pattern, String strategy) {
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMMM-yyyy hh:mm a");
+        String name = dateFormat.format(date);
+        name = mrn + "_" + eye + "_" + "_" + pattern + "_" + strategy + name;
+        name = name.replace("/", "-");
+        name = name.replace(":", "_");
+        name = name.replace(" ", "_");
+        name = name.replace("-", "_");
+        return name != null ? name : "";
+    }
+
     public static void writeToDisplayoLogFile(String string) {
         string = string + "  " + getCurrentTime();
         File dir = new File(DISPLAY_LOGS_FOLDER);
@@ -2848,7 +2860,8 @@ public final class CommonUtils {
     }
 
     public static void writeToBugFixLogFile(String string) {
-        string = string + "  "+ getCurrentTime();;
+        string = string + "  " + getCurrentTime();
+        ;
         File dir = new File(BUG_FIX_LOGS_FOLDER);
         if (!dir.exists())
             dir.mkdirs();
@@ -3014,6 +3027,41 @@ public final class CommonUtils {
         } catch (Exception e) {
             Log.e("writeJson", "Exception" + e.getMessage());
             //Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public static String getFilePath() {
+        try {
+            JSONObject config = CommonUtils.readConfig("Doctor Copy Fragment");
+            return config.getString("DeviceId") + "/MismatchedPatientData/" + getCurrentTime() + ".txt";
+        } catch (Exception e) {
+            return "/MismatchedPatientData/" + getCurrentTime() + ".txt";
+        }
+    }
+
+
+    public static void writeToDatabaseMergingLogFIle(String string) {
+        string = "\n" + string;
+        File dir = new File(DATABASE_RESTORE_LOGS_FOLDER);
+        if (!dir.exists())
+            dir.mkdirs();
+        File logFile = new File(dir.getPath(), "logs.txt");
+        if (!logFile.exists()) {
+            try {
+                logFile.createNewFile();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                Log.e("Exception", "writeToDatabaseMergingLogFIle" + e.getMessage());
+            }
+        }
+        try {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(string);
+            buf.newLine();
+            buf.close();
+        } catch (IOException e) {
+            Log.e(TAG, "writeToLogFile " + e.getMessage());
         }
     }
 
@@ -3211,11 +3259,18 @@ public final class CommonUtils {
     }
 
     public static boolean deleteFile(String inputPath, String inputFile) {
+        Log.e("deleteFile", "called ");
+        Log.e("inputFile", "  " + inputFile);
+        Log.e("inputPath", "  " + inputPath);
         try {
             // delete the original file
-            return new File(inputPath + inputFile).delete();
+            File file = new File(inputPath, inputFile);
+            Log.e("deleteFile", "Path " + file.getAbsolutePath());
+            boolean flag = file.getAbsoluteFile().delete();
+            Log.e("deleteFile", "flag " + flag);
+            return flag;
         } catch (Exception e) {
-            Log.e("tag", e.getMessage());
+            Log.e("deleteFile", " " + e.getMessage());
             return false;
         }
     }
@@ -3488,7 +3543,27 @@ public final class CommonUtils {
     }
 
     private static String getBytesToMBString(long bytes) {
-        return String.format(Locale.ENGLISH, "%.2fMb", bytes / (1024.00 * 1024.00));
+        return String.format(Locale.ENGLISH, "%.2fMB ", bytes / (1024.00 * 1024.00));
+    }
+
+    public static String generateDatabaseDownloadLink() {
+        String link = ApiEndPoint.RESTORE_DATABASE_ENDPOINT + CommonUtils.getHotSpotId() + "/patient-database.db";
+        Log.e("CheckMe", " " + link);
+        return link;
+    }
+
+    public static int returnClickCount() {
+        AppPreferencesHelper devicePreferencesHelper = new AppPreferencesHelper(MyApplication.getInstance(), DEVICE_PREF);
+        return devicePreferencesHelper.getPRBCount();
+    }
+
+
+    public static int getPRBCount(Context context) {
+        return new AppPreferencesHelper(context, DEVICE_PREF).getPRBCount();
+    }
+
+    public static void setPRBCount(int count) {
+        new AppPreferencesHelper(MyApplication.getInstance(), DEVICE_PREF).setPRBCount(count);
     }
 
     public static void newVersionAvailabe(final Activity activity, String versionName, int versionCode) {
@@ -3497,6 +3572,7 @@ public final class CommonUtils {
         builder.setTitle("Update Available")
                 .setMessage("New Version " + versionName + " " + versionCode + " Available")
                 .setCancelable(false)
+                .setPositiveButton("Download", (dialog, id) -> Actions.startDownloadUpdates())
                 .setPositiveButton("Download", (dialog, id) -> Actions.startDownloadUpdates())
                 .setNegativeButton("Later", (dialog, which) -> {
 
@@ -3768,6 +3844,19 @@ public final class CommonUtils {
             Log.e("packageInstaller", "Exception " + e.getMessage());
         }
         return packageInstallerStatus[0];
+    }
+
+    public static void packageInstallerForQ(Activity activity) {
+        final String dirPath = activity.getFilesDir().getPath();
+        final String fileName = "TC_latest.apk";
+        File outputFile = new File(dirPath + "/" + fileName);
+        Intent install = new Intent(Intent.ACTION_VIEW);
+        install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        Uri apkURI1 = FileProvider.getUriForFile(
+                activity, "com.agyohora.mobileperitc.fileprovider", outputFile);
+        install.setDataAndType(apkURI1, "application/vnd.android.package-archive");
+        install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        activity.startActivity(install);
     }
 
     private static IntentSender createIntentSender(Context context, int sessionId) {

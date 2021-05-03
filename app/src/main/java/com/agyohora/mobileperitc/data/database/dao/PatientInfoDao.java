@@ -8,10 +8,14 @@ import androidx.room.RoomWarnings;
 
 import com.agyohora.mobileperitc.data.database.PatientRecordFound;
 import com.agyohora.mobileperitc.data.database.entity.PatientInfo;
+import com.agyohora.mobileperitc.data.database.entity.PatientTestResult;
+
+import java.util.List;
 
 /**
- *  Created by Invent
- *  @see Dao
+ * Created by Invent
+ *
+ * @see Dao
  */
 
 @Dao
@@ -32,4 +36,13 @@ public interface PatientInfoDao {
 
     @Query("SELECT COUNT(*) from PatientInfo where PatientMrn =  :mrn")
     int countRows(String mrn);
+
+    @Query("SELECT * FROM PatientInfo")
+    List<PatientInfo> getAllPatientInfo();
+
+    @Query("SELECT PatientName FROM PatientInfo where PatientMrn =  :mrn")
+    String getPatientName(String mrn);
+
+    @Query("SELECT * FROM PatientInfo where PatientMrn= :mrn")
+    List<PatientInfo> getAllPatientInfoByMrn(String mrn);
 }

@@ -5,10 +5,14 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.RoomWarnings;
+import androidx.room.TypeConverter;
+import androidx.room.TypeConverters;
 
 import com.agyohora.mobileperitc.data.database.PatientRecordFound;
 import com.agyohora.mobileperitc.data.database.entity.PatientTestResult;
+import com.agyohora.mobileperitc.utils.TimestampConverter;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -67,4 +71,13 @@ public interface PatientTestResultDao {
 
     @Query("UPDATE PatientTestResult SET result = :resultData, PerimeteryObjectVersion = :version  WHERE Id = :id")
     int updateTestData(String id, byte[] resultData, int version);
+
+    @Query("SELECT * FROM PatientTestResult where PatientMrn = :id")
+    List<PatientTestResult> getAllPatientResults(String id);
+
+    @Query("SELECT * FROM PatientTestResult where PatientMrn =  :id")
+    PatientTestResult findByMRN(String id);
+
+    @Query("SELECT COUNT(*) from PatientTestResult where PatientMrn = :mrn and PatientName =:patientName and TestType = :strategy and TestPattern =:pattern and created_date =:createdDate")
+    int isTestResultPresent(String mrn, String patientName, String strategy, String pattern, String createdDate);
 }

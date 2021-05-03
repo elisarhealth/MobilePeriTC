@@ -2,6 +2,7 @@ package com.agyohora.mobileperitc.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -19,6 +20,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.agyohora.mobileperitc.R;
+import com.agyohora.mobileperitc.actions.Actions;
 import com.agyohora.mobileperitc.data.preferences.AppPreferencesHelper;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -62,6 +64,9 @@ public class AdminProfileActivity extends AppCompatActivity implements View.OnCl
             case R.id.logout_admin_profile:
                 logoutWarning();
                 break;
+            case R.id.restore_database:
+                restoreDatabase();
+                break;
         }
     }
 
@@ -73,6 +78,11 @@ public class AdminProfileActivity extends AppCompatActivity implements View.OnCl
             finish();
             startActivity(new Intent(this, LoginActivity.class));
         }
+    }
+
+    void restoreDatabase() {
+        finish();
+        Actions.showDataBaseRestore();
     }
 
     void logoutWarning() {
@@ -90,8 +100,8 @@ public class AdminProfileActivity extends AppCompatActivity implements View.OnCl
                 .setNegativeButton("Cancel", (dialog, id) -> {
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
     }
 
 
@@ -110,8 +120,8 @@ public class AdminProfileActivity extends AppCompatActivity implements View.OnCl
                 .setNegativeButton("Cancel", (dialog, id) -> {
                 });
         alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
         Button positiveButton = alert.getButton(AlertDialog.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(this);
     }
@@ -151,8 +161,8 @@ public class AdminProfileActivity extends AppCompatActivity implements View.OnCl
                 .setPositiveButton("Okay", (dialog, id) -> {
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
     }
 
     public boolean isValidPassword(final String password) {

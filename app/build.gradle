@@ -86,7 +86,7 @@ private String generateVersionName() {
         versionName += "-" + rootProject.ext.versionClassifier
     }*/
     String versionClassifier = "Oct30"
-    String versionName = "2.2.0-R"
+    String versionName = "2.2.6-R1"
 
     if (versionClassifier != null) {
         //versionName += "-" + versionClassifier
@@ -101,6 +101,7 @@ static def getDate() {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.google.firebase:firebase-storage:19.2.1'
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -135,6 +136,8 @@ dependencies {
     implementation "androidx.navigation:navigation-dynamic-features-fragment:2.3.1"
 
     implementation "androidx.browser:browser:1.2.0"
+
+    implementation 'com.linkedin.dexmaker:dexmaker:2.25.0'
 
     //implementation 'com.facebook.shimmer:shimmer:0.5.0'
 

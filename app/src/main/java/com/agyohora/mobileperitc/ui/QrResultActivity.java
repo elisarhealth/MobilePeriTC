@@ -3,6 +3,7 @@ package com.agyohora.mobileperitc.ui;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -110,7 +111,10 @@ public class QrResultActivity extends AppCompatActivity {
                     appPreferencesHelper.setOrgId(siteId);
                     CommonUtils.writeToConfigFile(devId, orgName, siteId, configString);
                 }
-                activeView_number = R.layout.hmd_sync_check_activity;
+                if (!appPreferencesHelper.getProductionSetUpStatus() && Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1)
+                    activeView_number = R.layout.activity_setup_hotspot;
+                else
+                    activeView_number = R.layout.hmd_sync_check_activity;
                 startActivity(new Intent(this, MainActivity.class));
                 /*if (appPreferencesHelper.getProductionSetUpStatus() && appPreferencesHelper.getUserSetUpStatus()) {
                     CommonUtils.writeToConfigFile(devId,orgName,siteId);

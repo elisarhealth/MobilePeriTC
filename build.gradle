@@ -45,12 +45,12 @@ ext {
     //app versioning
     versionMajor = 2
     versionMinor = 2
-    versionPatch = 0
+    versionPatch = 6
     versionClassifier = "R"
 
     // Sdk and tools
     minimumSdkVersion = 22
     targetSdkVersion = 26
-    compileSdkVersion = 28
+    compileSdkVersion = 29
     buildToolsVersion = '26.0.2'
 }

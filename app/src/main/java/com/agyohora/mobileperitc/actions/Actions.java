@@ -122,7 +122,15 @@ public class Actions extends IntentService {
     public static final String ACTION_BEGIN_TC_UPDATE_ALONE = "com.agyohora.mobileperitc.actions.actions.name.beginTCUpdateAlone";
     public static final String ACTION_CLOSE_THE_TC = "com.agyohora.mobileperitc.actions.actions.name.close_tc";
     public static final String ACTION_START_LOGOUT_DECOY = "com.agyohora.mobileperitc.actions.actions.name.logout_decoy";
-
+    public static final String ACTION_START_DATABASE_RESTORE = "com.agyohora.mobileperitc.actions.actions.name.check.database_restore";
+    public static final String ACTION_DATABASE_RESTORE_AVAILABLE = "com.agyohora.mobileperitc.actions.actions.name.database_restore_available";
+    public static final String ACTION_START_DATABASE_DOWNLOAD = "com.agyohora.mobileperitc.actions.actions.name.start_database_download";
+    public static final String ACTION_START_DATABASE_MERGING = "com.agyohora.mobileperitc.actions.actions.name.start_database_merging";
+    public static final String ACTION_UPLOAD_DATABASE_RESTORE_LOGS = "com.agyohora.mobileperitc.actions.actions.name.upload_database_restore_logs";
+    public static final String ACTION_FINISH_DATABASE_RESTORE = "com.agyohora.mobileperitc.actions.actions.name.finish_database_restore";
+    public static final String ACTION_FINISH_DATABASE_RESTORE_WITHOUT_DATA = "com.agyohora.mobileperitc.actions.actions.name.finish_database_restore_data";
+    public static final String ACTION_UPDATE_PRB = "com.agyohora.mobileperitc.actions.actions.name.update_prb";
+    public static final String ACTION_OPEN_HMD_SYNC = "com.agyohora.mobileperitc.actions.actions.name.show_hmd_sync_screen";
 
     public Actions() {
         super("Actions");
@@ -340,7 +348,7 @@ public class Actions extends IntentService {
         fireTheIntent(payload);
     }
 
-    public static void closeTheTC(){
+    public static void closeTheTC() {
         Bundle payload = actionCreator(ACTION_CLOSE_THE_TC);
         payload.putString("data", "NA");
         fireTheIntent(payload);
@@ -348,6 +356,18 @@ public class Actions extends IntentService {
 
     public static void showLogOutDecoy() {
         Bundle payload = actionCreator(ACTION_START_LOGOUT_DECOY);
+        payload.putString("data", "NA");
+        fireTheIntent(payload);
+    }
+
+    public static void showDataBaseRestore() {
+        Bundle payload = actionCreator(ACTION_START_DATABASE_RESTORE);
+        payload.putString("data", "NA");
+        fireTheIntent(payload);
+    }
+
+    public static void showDatabaseAvailable() {
+        Bundle payload = actionCreator(ACTION_DATABASE_RESTORE_AVAILABLE);
         payload.putString("data", "NA");
         fireTheIntent(payload);
     }
@@ -443,6 +463,39 @@ public class Actions extends IntentService {
         payload.putString("data", null);
         fireTheIntent(payload);
 
+    }
+
+    public static void startDownloadDatabase() {
+        Bundle payload = actionCreator(ACTION_START_DATABASE_DOWNLOAD);
+        payload.putString("data", null);
+        fireTheIntent(payload);
+
+    }
+
+    public static void startDownloadMerging() {
+        Bundle payload = actionCreator(ACTION_START_DATABASE_MERGING);
+        payload.putString("data", null);
+        fireTheIntent(payload);
+    }
+
+    public static void uploadDataRestoreLogs(String data) {
+        Log.e("uploadDataRestoreLogs", "called");
+        Bundle payload = actionCreator(ACTION_UPLOAD_DATABASE_RESTORE_LOGS);
+        payload.putString("data", data);
+        fireTheIntent(payload);
+    }
+
+    public static void dataRestoreFinished(String data) {
+        Log.e("dataRestoreFinished", "called");
+        Bundle payload = actionCreator(ACTION_FINISH_DATABASE_RESTORE);
+        payload.putString("data", data);
+        fireTheIntent(payload);
+    }
+
+    public static void dataRestoreFinished() {
+        Bundle payload = actionCreator(ACTION_FINISH_DATABASE_RESTORE_WITHOUT_DATA);
+        payload.putString("data", null);
+        fireTheIntent(payload);
     }
 
     public static void startTCUpdate() {
@@ -652,6 +705,12 @@ public class Actions extends IntentService {
         fireTheIntent(payload);
     }
 
+    public static void startHMDSync() {
+        Bundle payload = actionCreator(ACTION_OPEN_HMD_SYNC);
+        payload.putString("data", null);
+        fireTheIntent(payload);
+    }
+
     public static void silentlyStopTest() {
         Bundle payload = actionCreator(ACTION_STOP_TEST_SILENTLY);
         payload.putString("data", null);
@@ -673,6 +732,12 @@ public class Actions extends IntentService {
     public static void setActionCheckForPreviousResults() {
         Bundle payload = actionCreator(ACTION_CHECK_FOR_PREVIOUS_RESULTS);
         payload.putString("data", null);
+        fireTheIntent(payload);
+    }
+
+    public static void doPrbUpdate() {
+        Bundle payload = actionCreator(ACTION_UPDATE_PRB);
+        payload.putString("data", "NA");
         fireTheIntent(payload);
     }
 

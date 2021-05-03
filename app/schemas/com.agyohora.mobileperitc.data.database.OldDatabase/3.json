@@ -1,0 +1,174 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "3572aedd0cd4638c483953bac5610503",
+    "entities": [
+      {
+        "tableName": "PatientTestResult",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `PatientInfoId` INTEGER NOT NULL, `PatientName` TEXT, `PatientMrn` TEXT, `PatientMobile` TEXT, `PatientDob` TEXT, `PatientSex` TEXT, `TestEye` TEXT, `TestType` TEXT, `TestPattern` TEXT, `TestSuggestion` TEXT, `Active` INTEGER NOT NULL, `SyncStatus` INTEGER NOT NULL, `result` BLOB, `created_date` TEXT, `PerimeteryObjectVersion` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientInfoId",
+            "columnName": "PatientInfoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientName",
+            "columnName": "PatientName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "patientMrn",
+            "columnName": "PatientMrn",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "patientMobile",
+            "columnName": "PatientMobile",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "patientDOB",
+            "columnName": "PatientDob",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "patientSex",
+            "columnName": "PatientSex",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "testEye",
+            "columnName": "TestEye",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "testType",
+            "columnName": "TestType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "testPattern",
+            "columnName": "TestPattern",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "testSuggestion",
+            "columnName": "TestSuggestion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "Active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "SyncStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "result",
+            "columnName": "result",
+            "affinity": "BLOB",
+            "notNull": false
+          },
+          {
+            "fieldPath": "createDate",
+            "columnName": "created_date",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "PerimeteryObjectVersion",
+            "columnName": "PerimeteryObjectVersion",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PatientInfo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`Id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `PatientName` TEXT, `PatientMrn` TEXT, `PatientMobile` TEXT, `PatientDob` TEXT, `PatientSex` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "Id",
+            "columnName": "Id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientName",
+            "columnName": "PatientName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "patientMrn",
+            "columnName": "PatientMrn",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "patientMobile",
+            "columnName": "PatientMobile",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "patientDOB",
+            "columnName": "PatientDob",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "patientSex",
+            "columnName": "PatientSex",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "Id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3572aedd0cd4638c483953bac5610503')"
+    ]
+  }
+}

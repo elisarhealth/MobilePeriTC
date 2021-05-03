@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:ignore="MissingDefaultResource">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <View
+            android:id="@+id/back_view"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="@color/primaryTwo" />
+
+        <LinearLayout
+            android:id="@+id/front_view"
+            android:layout_width="400dp"
+            android:layout_height="700dp"
+            android:layout_marginEnd="51dp"
+            android:layout_marginStart="52dp"
+            android:background="@drawable/rounded_corner_white"
+            android:elevation="5dp"
+            android:orientation="vertical"
+            android:padding="5dp"
+            app:layout_anchor="@id/back_view"
+            app:layout_anchorGravity="bottom|center">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginTop="200dp"
+                android:id="@+id/error_message"
+                android:text=""
+                android:textColor="#4a4a4a"
+                android:textSize="24sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginTop="100dp"
+                android:text=""
+                android:id="@+id/error_code"
+                android:textColor="#767676"
+                android:textSize="18sp" />
+
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="clickCallback"
+                android:layout_marginTop="150dp"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/go_home"
+                    android:layout_width="150dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/rounded_colored_corner_with_white_filled"
+                    android:onClick="clickCallback"
+                    android:textStyle="bold"
+                    android:text="Go Home"
+                    android:layout_marginEnd="24dp"
+                    android:textColor="@color/primaryTwo" />
+
+
+                <Button
+                    android:id="@+id/error_accessory_modules_restart_hmd_button"
+                    android:layout_width="150dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/rounded_colored_corner_with_white_filled"
+                    android:onClick="clickCallback"
+                    android:textStyle="bold"
+                    android:text="@string/restart_hmd"
+                    android:textColor="@color/primaryTwo" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

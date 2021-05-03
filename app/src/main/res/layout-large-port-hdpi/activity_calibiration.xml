@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@color/white"
+    tools:ignore="MissingDefaultResource">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <View
+            android:id="@+id/back_view"
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:background="@color/colorPrimaryDark" />
+
+        <LinearLayout
+            android:id="@+id/front_view"
+            android:layout_width="497dp"
+            android:layout_height="100dp"
+            android:layout_marginEnd="51dp"
+            android:layout_marginStart="52dp"
+            android:background="@drawable/rounded_corner"
+            android:elevation="5dp"
+            android:gravity="start|center"
+            android:orientation="horizontal"
+
+            android:padding="5dp"
+            app:layout_anchor="@id/back_view"
+            app:layout_anchorGravity="bottom|center">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="34dp"
+                android:contentDescription="@string/imageDescription"
+                android:src="@drawable/icon_script" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="27dp"
+                android:gravity="center"
+                android:text="@string/calibration"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="28sp" />
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="650dp"
+        android:layout_marginTop="10dp"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/coordinatorLayout">
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/first_card"
+            android:layout_width="497dp"
+            android:layout_height="70dp"
+            android:layout_marginEnd="52dp"
+            android:layout_marginStart="51dp"
+            android:layout_marginTop="20dp"
+            android:onClick="animateCard"
+            app:cardElevation="5dp">
+
+
+            <TextView
+                android:id="@+id/PatientName"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="@string/peter_parker"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="20dp"
+                android:layout_marginStart="200dp"
+                android:layout_marginTop="20dp"
+                android:background="@android:color/darker_gray" />
+
+            <TextView
+                android:id="@+id/PatientSex"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="230dp"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="@string/male"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="20dp"
+                android:layout_marginStart="320dp"
+                android:layout_marginTop="20dp"
+                android:background="@android:color/darker_gray" />
+
+            <TextView
+                android:id="@+id/PatientAge"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="350dp"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="@string/_32"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/showHide"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="30dp"
+                android:layout_marginStart="430dp"
+                android:layout_marginTop="20dp"
+                android:contentDescription="@string/imageDescription"
+                android:onClick="animateCard"
+                android:src="@drawable/ic_keyboard_arrow_down_black_48px" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/hiddenCard"
+            android:layout_width="497dp"
+            android:layout_height="80dp"
+            android:layout_marginEnd="52dp"
+            android:layout_marginStart="51dp"
+            android:background="@color/light_grey"
+            android:elevation="0dp"
+            android:visibility="gone"
+            app:cardPreventCornerOverlap="false">
+
+            <TextView
+                android:id="@+id/TestStrategy"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="350dp"
+                android:layout_marginTop="38dp"
+                android:text="@string/elisar_fast"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/textTestStrategy"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="350dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/test_strategy"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/TestEye"
+                android:layout_width="90dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="230dp"
+                android:layout_marginTop="38dp"
+                android:text="@string/left"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/textTestEye"
+                android:layout_width="90dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="230dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/test_eye"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/PatientMRNNumber"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="38dp"
+                android:text="@string/_1002132"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/textMRNNumber"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="15dp"
+                android:text="@string/mrn_number"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="16sp" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="497dp"
+            android:layout_height="500dp"
+            android:layout_marginEnd="52dp"
+            android:layout_marginStart="51dp"
+            android:layout_marginTop="10dp"
+            android:padding="20dp"
+            app:cardElevation="2dp">
+
+            <ImageView
+                android:id="@+id/calibrationEye"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:layout_marginStart="100dp"
+                android:layout_marginTop="25dp"
+                android:contentDescription="@string/imageDescription" />
+
+            <TextView
+                android:layout_width="200dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="150dp"
+                android:layout_marginTop="330dp"
+                android:gravity="center"
+                android:text="@string/ask_patient_to_look_at_the_center_of_the_screen" />
+
+            <LinearLayout
+                android:layout_width="360dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="80dp"
+                android:layout_marginTop="400dp"
+                android:orientation="horizontal"
+                android:weightSum="4">
+
+                <Button
+                    android:id="@+id/calibrateSkip_Button"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5"
+                    android:background="@drawable/rounded_colored_corner_with_white_filled"
+                    android:onClick="clickCallback"
+                    android:text="@string/skip"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:visibility="invisible" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5" />
+
+                <Button
+                    android:id="@+id/calibrateRecalibrate_Button"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5"
+                    android:background="@drawable/rounded_colored_corner_with_white_filled"
+                    android:onClick="clickCallback"
+                    android:text="@string/calibrate"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:visibility="invisible" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+
+    </LinearLayout>
+
+
+    <Button
+        android:id="@+id/calibration_continue_button"
+        style="@style/RoundedButtonWithArrow"
+        android:layout_width="200dp"
+        android:layout_height="52dp"
+        android:layout_marginBottom="60dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginStart="360dp"
+        android:layout_marginTop="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="clickCallback"
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp"
+        android:text="@string/continueButton"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

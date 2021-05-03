@@ -1,6 +1,7 @@
 package com.agyohora.mobileperitc.ui;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -70,6 +71,9 @@ public class ServiceProfileActivity extends AppCompatActivity implements View.On
                     CommonUtils.initiateNetworkOptions(this, this, "not_applicable");
                 }
                 break;
+            case R.id.prb_management:
+                startActivity(new Intent(this, ClickerManagement.class));
+                break;
         }
     }
 
@@ -88,8 +92,9 @@ public class ServiceProfileActivity extends AppCompatActivity implements View.On
                 .setNegativeButton("Cancel", (dialog, id) -> {
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+                alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
     }
 
     @Override
@@ -144,8 +149,8 @@ public class ServiceProfileActivity extends AppCompatActivity implements View.On
                 .setNegativeButton("Cancel", (dialog, id) -> {
                 });
         alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
         Button positiveButton = alert.getButton(AlertDialog.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(this);
     }

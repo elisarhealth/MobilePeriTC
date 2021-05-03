@@ -10,6 +10,8 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,9 +19,11 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
@@ -57,6 +61,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -72,13 +77,16 @@ import com.agyohora.mobileperitc.asynctasks.LoadMappedIconView;
 import com.agyohora.mobileperitc.asynctasks.LoadMappedLargeText;
 import com.agyohora.mobileperitc.asynctasks.LoadMappedView;
 import com.agyohora.mobileperitc.asynctasks.LoadScreeningGraphs;
+import com.agyohora.mobileperitc.asynctasks.MergeDatabase;
 import com.agyohora.mobileperitc.asynctasks.SearchPatientBasicDetails;
+import com.agyohora.mobileperitc.communication.CommunicationReceiver;
 import com.agyohora.mobileperitc.communication.CommunicationService;
 import com.agyohora.mobileperitc.data.database.AppDatabase;
 import com.agyohora.mobileperitc.data.database.entity.PatientTestResult;
 import com.agyohora.mobileperitc.data.network.ApiEndPoint;
 import com.agyohora.mobileperitc.data.preferences.AppPreferencesHelper;
 import com.agyohora.mobileperitc.exceptions.AccessoryStatusException;
+import com.agyohora.mobileperitc.exceptions.PrbException;
 import com.agyohora.mobileperitc.interfaces.AsyncDbInsertRecordTask;
 import com.agyohora.mobileperitc.interfaces.AsyncDbTaskString;
 import com.agyohora.mobileperitc.myapplication.MyApplication;
@@ -95,20 +103,28 @@ import com.agyohora.mobileperitc.worksheduler.workcreator.WorkCreator;
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
 import com.androidnetworking.interfaces.JSONArrayRequestListener;
+import com.androidnetworking.interfaces.OkHttpResponseListener;
 import com.bumptech.glide.Glide;
 import com.downloader.Error;
 import com.downloader.OnDownloadListener;
 import com.downloader.PRDownloader;
 import com.downloader.Status;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.text.Format;
 import java.text.ParseException;
@@ -120,6 +136,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import okhttp3.Response;
 
 import static android.view.View.GONE;
 import static com.agyohora.mobileperitc.actions.Actions.backToHomeScreen;
@@ -150,6 +168,7 @@ import static com.agyohora.mobileperitc.utils.CommonUtils.nullCheck;
 import static com.agyohora.mobileperitc.utils.CommonUtils.showBigToast;
 import static com.agyohora.mobileperitc.utils.CommonUtils.showToasty;
 import static com.agyohora.mobileperitc.utils.CommonUtils.stopKiosk;
+import static com.agyohora.mobileperitc.utils.Constants.DATABASE_RESTORE_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.HmdBatteryStatus.BATTERY_LOW_KEEP_CHARGING;
 import static com.agyohora.mobileperitc.utils.HmdBatteryStatus.BATTERY_LOW_PLEASE_CHARGE_HMD;
 import static com.agyohora.mobileperitc.utils.HmdBatteryStatus.BATTERY_OK;
@@ -190,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
     private ImageView note;
     View production_test_done_bar;
     Button production_test_done;
-    Status tcDownloadStatus, hmdDownloadStatus;
+    Status tcDownloadStatus, hmdDownloadStatus, databaseDownloadStatus;
     Handler h = new Handler();
     boolean isUpdateCalled = false;
     boolean[] isTcUpdateSuccess = {false};
@@ -273,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 deleteReportConfirmationDialog(MainActivity.this, MainActivity.this, rowId, item, false);
                 return true;
             case R.id.action_post_test_home:
-                item.setEnabled(false);
+                //item.setEnabled(false);
                 backToHomeScreen();
                 return true;
         }
@@ -300,6 +319,32 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
             }
         }
     };
+
+    private final BroadcastReceiver hotspotReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.e("hotspotReceiver", " action " + action);
+            if ("android.net.wifi.WIFI_AP_STATE_CHANGED".equals(action)) {
+
+                // get Wi-Fi Hotspot state here
+                int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
+
+                if (WifiManager.WIFI_STATE_ENABLED == state % 10) {
+                    // Wifi is enabled
+                    Log.e("hotspotReceiver", " Hotspot is enabled ");
+                    isHotSpotOn = true;
+                    invalidateOptionsMenu();
+                } else {
+                    Log.e("hotspotReceiver", " Hotspot is disabled ");
+                    isHotSpotOn = false;
+                    invalidateOptionsMenu();
+                }
+            }
+        }
+    };
+
+
     private Runnable duringTest_ImageView_Runnable = new Runnable() {
         @Override
         public void run() {
@@ -583,18 +628,32 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
         //register communication receiver
         IntentFilter commFilter = new IntentFilter();
         commFilter.addAction(StoreTransmitter.CHANGETRIGG_COMM);
+        this.registerReceiver(new CommunicationReceiver(), commFilter);
        /* IntentFilter restart = new IntentFilter();
         this.registerReceiver(new StartUpReceiver(), restart);*/
 
         am = (ActivityManager) getSystemService(
                 Context.ACTIVITY_SERVICE);
         batteryReceiver = new BatteryBroadcastReceiver();
+
+        IntentFilter hotspotReceiverIntent = new IntentFilter("android.net.wifi.WIFI_AP_STATE_CHANGED");
+        registerReceiver(hotspotReceiver, hotspotReceiverIntent);
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) actionBar.setElevation(0);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         activeState = new Bundle();
 
         // throw new NullPointerException();
+
+        AppPreferencesHelper devicePreferencesHelper = new AppPreferencesHelper(this, DEVICE_PREF);
+        if (devicePreferencesHelper.getProductionTestingStatus() && devicePreferencesHelper.getUserSetUpStatus()) {
+            startBackgroundWorks();
+            //h.postDelayed(modeSyncCheck, delay);
+        } else {
+            Log.e("ModeSync", " " + devicePreferencesHelper.getProductionTestingStatus());
+            Log.e("ModeSync", " " + devicePreferencesHelper.getUserSetUpStatus());
+        }
     }
 
     @Override
@@ -645,14 +704,7 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
         commFilter.addAction(StoreTransmitter.CHANGETRIGG_COMM);
         new Handler(Looper.getMainLooper()).postDelayed(() -> registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED)), 2000);
         updateUI("onResume mainactivity");
-        AppPreferencesHelper devicePreferencesHelper = new AppPreferencesHelper(this, DEVICE_PREF);
-        if (devicePreferencesHelper.getProductionTestingStatus() && devicePreferencesHelper.getUserSetUpStatus()) {
-            startBackgroundWorks();
-            //h.postDelayed(modeSyncCheck, delay);
-        } else {
-            Log.e("ModeSync", " " + devicePreferencesHelper.getProductionTestingStatus());
-            Log.e("ModeSync", " " + devicePreferencesHelper.getUserSetUpStatus());
-        }
+
     }
 
     @Override
@@ -693,6 +745,19 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
 
     private void onBackPressed(int activeViewID) {
         switch (activeViewID) {
+            case R.layout.checking_for_database_in_remote:
+
+                activeView_number = R.layout.test_controller_settings;
+                startActivity(new Intent(this, AdminProfileActivity.class));
+                break;
+            case R.layout.download_database:
+                if (databaseDownloadStatus != Status.COMPLETED)
+                    cancelDownloadAndGoToSettingsScreen();
+                break;
+            case R.layout.merging_database:
+                if (databaseDownloadStatus == Status.COMPLETED)
+                    cancelDownloadAndGoToSettingsScreen();
+                break;
             case R.layout.download_update_screen:
                 if (tcDownloadStatus != Status.COMPLETED || hmdDownloadStatus != Status.COMPLETED)
                     cancelDownloadAndGoToSettingsScreen();
@@ -769,33 +834,43 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        if (isHotSpotOn) {
+            menu.findItem(R.id.action_hotspot_status).setIcon(R.drawable.ic_wifi_tethering_on);
+        } else {
+            menu.findItem(R.id.action_hotspot_status).setIcon(R.drawable.ic_wifi_tethering_off);
+        }
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_network_settings:
                 //stopKiosk();
                 //startActivityForResult(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK), 30);
                 break;
-            case R.id.action_hmd_status:
+            case R.id.action_hotspot_status:
                 if (activeView_number == R.layout.activity_home_screen || activeView_number == R.layout.test_controller_settings
                         || activeView_number == R.layout.new_hmd_details_activity || activeView_number == R.layout.download_update_screen) {
                     Log.e("onOptionsItemSelected", " isHotSpotOn " + isHotSpotOn);
                     if (isHotSpotOn) {
-                        CommonUtils.turningOffHotSpotDialog(this);
+                        showHotSpotStatusDialog(false);
                         Bundle bundle = new Bundle();
                         bundle.putString("data", "NA");
                         StoreTransmitter.doCommFunction(StoreTransmitter.COMM_FUNCTION_STOP, bundle);
                         item.setIcon(R.drawable.ic_wifi_tethering_off);
                         Store.newTestVisibility = false;
-                        isHotSpotOn = false;
                         MyApplication.getInstance().set_HMD_CONNECTION_NEED(false);
                         MyApplication.getInstance().set_HMD_CONNECTED(false);
                     } else {
-                        CommonUtils.initiatingHotSpotDialog(this);
+                        communicationActive = false;
+                        showHotSpotStatusDialog(true);
                         MyApplication.getInstance().set_HMD_CONNECTION_NEED(true);
                         MyApplication.getInstance().set_HMD_CONNECTED(true);
                         Actions.initCommunication();
                         item.setIcon(R.drawable.ic_wifi_tethering_on);
-                        isHotSpotOn = true;
                     }
                 }
                 break;
@@ -1008,6 +1083,18 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 downloadTCUpdate(tc_percentage, tc_progress, restart_tc_download, devicePreferencesHelper);
                 break;
 
+            case R.id.restart_database_download:
+                Button restart_database_download = findViewById(R.id.restart_database_download);
+                TextView database_percentage = findViewById(R.id.database_percentage);
+                ProgressBar database_progress = findViewById(R.id.database_progress);
+                restart_database_download.setVisibility(View.INVISIBLE);
+                downloadDatabase(database_percentage, database_progress, restart_database_download);
+                break;
+
+            case R.id.database_finished:
+                goHomeImmediately();
+                break;
+
             case R.id.restart_hmd_download:
                 Button restart_hmd_download = findViewById(R.id.restart_hmd_download);
                 ProgressBar hmd_progress = findViewById(R.id.hmd_progress);
@@ -1023,8 +1110,14 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
             case R.id.beginUpdate:
                 Actions.startDownloadUpdates();
                 break;
+            case R.id.beginDatabaseMerging:
+                Actions.startDownloadDatabase();
+                break;
 
             case R.id.updateLater:
+                Actions.beginTestControllerSettings();
+                break;
+            case R.id.mergeLater:
                 Actions.beginTestControllerSettings();
                 break;
 
@@ -1156,15 +1249,27 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 timeWhenStopped = 0;
                 isChronometerRunning = false;
                 new AppPreferencesHelper(MainActivity.this, PREF_NAME).setPatientDetailsViewVisibility(false);
+                int prbCount = CommonUtils.returnClickCount();
+                Log.e("returnClickCount", " " + prbCount);
                 if (!CommonUtils.is_TC_HMD_Version_Matches()) {
                     versionMismatchDialog();
-                } else if (CommonUtils.isMobileDataOn(this)) {
+                } else if (prbCount >= 1000000) {
+                    prbValidityReached();
+                } /*else if (CommonUtils.isMobileDataOn(this)) {
+                    if (CommonUtils.returnClickCount() > 600000) {
+                        int count = CommonUtils.getPRBCount(MainActivity.this);
+                        FirebaseCrashlytics.getInstance().recordException(new PrbException("PRB reaches the limit " + count));
+                    }
                     if (CommonUtils.getNetworkType(this).equalsIgnoreCase("2g")) {
                         CommonUtils.openMobileData(this);
                     } else {
                         checkCriticalUpdateAndContinue();
                     }
-                } else {
+                } */ else {
+                    if (prbCount >= 600000) {
+                        String msg = "PRB reaches the limit " + prbCount;
+                        FirebaseCrashlytics.getInstance().recordException(new PrbException(msg));
+                    }
                     checkCriticalUpdateAndContinue();
                 }
 
@@ -1598,6 +1703,32 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
     public void settingsClickCallback(final View v) {
         Log.d("SettingsClickCallback", " Called ");
         switch (v.getId()) {
+            case R.id.hotspot_created_continue:
+                CommonUtils.showAcknowlegmentDialog(this);
+                break;
+            case R.id.copy_hotspot_name:
+                String serial = CommonUtils.isUserSetUpFinished(this) ? CommonUtils.getHotSpotId() : CommonUtils.getSavedDeviceId(this);
+                String hotspotName = CommonUtils.getDetailsFromSerialNumber(serial, "DeviceId");
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Hotpsot Name", hotspotName);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(this, "Hotspot Name Copied", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.copy_hotspot_password:
+                ClipboardManager clipboard1 = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                ClipData clip1 = ClipData.newPlainText("Hotpsot Password", "agyohora");
+                clipboard1.setPrimaryClip(clip1);
+                Toast.makeText(this, "Hotspot Password Copied", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.open_hotspot_settings:
+                //com.android.settings ClassName com.android.settings.SubSettings
+                final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                final ComponentName cn = new ComponentName("com.android.settings", "com.android.settings.TetherSettings");
+                intent.setComponent(cn);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                break;
             case R.id.hmd_sync_proceed_button:
                 AppPreferencesHelper devicePreferencesHelper = new AppPreferencesHelper(MainActivity.this, DEVICE_PREF);
                 if (!devicePreferencesHelper.getProductionSetUpStatus())
@@ -1697,7 +1828,8 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
 
                 });
         androidx.appcompat.app.AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -1729,7 +1861,8 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
 
                 });
         androidx.appcompat.app.AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -1765,7 +1898,7 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 String configOutputPath = getFilesDir().getAbsolutePath();
                 boolean isVectorFileCopied = CommonUtils.copyFile(vectorInputPath, vectorFileName, vectorOutputPath);
                 boolean isConfigFileCopied = CommonUtils.copyFile(confiInputPath, configFileName, configOutputPath);
-                if (!vectorFileStatus) {
+                if (!configFileStatus) {
                     if (isConfigFileCopied) {
                         preferencesHelper.putConfigFileCopiedStatus(true);
                         CommonUtils.showToasty(this, "Config File Copied Successfully", true, 'I');
@@ -1773,10 +1906,11 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                         CommonUtils.showToasty(this, "Config File Not Copied", true, 'E');
                     }
                 }
-                if (!configFileStatus) {
+                if (!vectorFileStatus) {
                     if (isVectorFileCopied) {
                         if (CommonUtils.readVector() != null) {
-                            if (CommonUtils.deleteFile(vectorInputPath, vectorFileName)) {
+                            //if (CommonUtils.deleteDirectory(new File(vectorInputPath, vectorFileName))) {
+                            if (true) {
                                 preferencesHelper.putVectorFileCopiedStatus(true);
                                 CommonUtils.showToasty(this, "Vector File Copied Successfully", true, 'I');
                             } else {
@@ -1842,6 +1976,25 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 }
                 break;
         }
+    }
+
+    public void getIsRestoreDatabaseAvailable() {
+        AndroidNetworking.get(CommonUtils.generateDatabaseDownloadLink())
+                .build()
+                .getAsOkHttpResponse(new OkHttpResponseListener() {
+                    @Override
+                    public void onResponse(Response response) {
+                        Log.e("CheckMe", "Success " + response.isSuccessful());
+                        Actions.showDatabaseAvailable();
+                    }
+
+                    @Override
+                    public void onError(ANError anError) {
+                        Log.e("CheckMe", "Error " + anError.getErrorBody());
+                        Toast.makeText(applicationContext, "No Database Available!", Toast.LENGTH_LONG).show();
+                        startActivity(new Intent(MainActivity.this, AdminProfileActivity.class));
+                    }
+                });
     }
 
     public void getUpdateDetails() {
@@ -2014,6 +2167,42 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                         CommonUtils.initiateNetworkOptions(this, this, "applicable");
                     }
                     break;
+                case R.layout.checking_for_database_in_remote:
+                    databaseDownloadStatus = Status.UNKNOWN;
+                    if (CommonUtils.isNetworkConnected(this)) {
+                        getIsRestoreDatabaseAvailable();
+                    } else {
+                        CommonUtils.initiateNetworkOptions(this, this, "applicable");
+                    }
+                    break;
+                case R.layout.database_restore_available:
+                    break;
+                case R.layout.restore_database_finished:
+                    TextView merging_helper_text = findViewById(R.id.merging_helper_text);
+                    int recordMismatched = state.getInt("recordMismatched");
+                    int recordsInserted = state.getInt("recordsInserted");
+                    int recordsDuplicated = state.getInt("recordsDuplicated");
+                    int totalNumberOfRecords = state.getInt("totalNumberOfRecords");
+                    String success = "Database is successfully merged. ";
+                    String totalRecords = "Total Number of records = " + totalNumberOfRecords;
+                    String misMatchedMsg = "Total Errors = " + recordMismatched;
+                    String insertedMsg = "Records Inserted = " + recordsInserted;
+                    String duplicatedMsg = "Duplicate Records = " + recordsDuplicated;
+                    String elisar = "Elisar Service Team will contact you on further decision. ";
+                    if (recordMismatched > 0) {
+                        String msg = totalRecords + "\n" + insertedMsg + "\n" + misMatchedMsg + "\n" + elisar;
+                        merging_helper_text.setText(msg);
+                    } else {
+                        String msg = totalRecords + "\n Records inserted = " + totalNumberOfRecords + "\n" + success;
+                        merging_helper_text.setText(msg);
+                        /*if (recordsInserted > 0 && recordsDuplicated > 0) {
+                            String msg = totalRecords + "\n Records inserted = " + totalNumberOfRecords;
+                            merging_helper_text.setText(msg);
+                        } else if (recordsInserted > 0) {
+                            merging_helper_text.setText(success);
+                        }*/
+                    }
+                    break;
                 case R.layout.closing_the_app:
                     closeTheApp();
                     break;
@@ -2084,7 +2273,10 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                     Log.e("isUpdateCalled", "isUpdateCalled " + isUpdateCalled);
                     if (!isUpdateCalled) {
                         isUpdateCalled = true;
-                        isTcUpdateSuccess[0] = CommonUtils.packageInstaller(MainActivity.this);
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+                            isTcUpdateSuccess[0] = CommonUtils.packageInstaller(MainActivity.this);
+                        else
+                            CommonUtils.packageInstallerForQ(this);
                     }/* else if (!isTcUpdateSuccess[0]) {
                         dialogThree();
                     }*/
@@ -2137,6 +2329,44 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                     } else {
                         profileText.setText("");
                     }
+                    break;
+
+                case R.layout.download_database:
+                    Button restart_database_download = findViewById(R.id.restart_database_download);
+                    TextView database_percentage = findViewById(R.id.database_percentage);
+                    ProgressBar database_progress = findViewById(R.id.database_progress);
+                    if (databaseDownloadStatus != Status.COMPLETED) {
+                        downloadDatabase(database_percentage, database_progress, restart_database_download);
+                    }
+                    break;
+
+                case R.layout.merging_database:
+                    new MergeDatabase(bool -> {
+                        Log.e("MergeDatabase", "Executed");
+                    }, this).execute();
+                    break;
+
+                case R.layout.uploading_database_restore_logs:
+                    FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+                    StorageReference storageRef = firebaseStorage.getReference();
+
+                    StorageReference mismatchFileRef = storageRef.child(CommonUtils.getFilePath());
+                    Uri file = Uri.fromFile(new File(DATABASE_RESTORE_LOGS_FOLDER + "logs.txt"));
+
+                    UploadTask uploadTask = mismatchFileRef.putFile(file);
+
+                    uploadTask.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            Log.e("Exception", " " + exception.getMessage());
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Actions.dataRestoreFinished();
+                            Log.e("OnSuccess", "of storage " + taskSnapshot.getMetadata().getName());
+                        }
+                    });
                     break;
 
                 case R.layout.download_update_screen:
@@ -2285,17 +2515,22 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                         Log.e("isHotSpotOn", "" + isHotSpotOn);
                         Log.e("isCommInitOver", "" + isCommInitializationOver);
                         Log.e("communicationActive", "" + communicationActive);
-                        if (isCommInitializationOver) {
+                        /*if (isCommInitializationOver) {
                             if (!isHotSpotOn) {
                                 menu.getItem(2).setIcon(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_wifi_tethering_off));
                             }
-                        }
+                        }*/
                         if (newTestVisibility) {
                             if (CommonUtils.is_TC_HMD_Version_Matches()) {
                                 new_test.setTextColor(getResources().getColor(R.color.primaryTwo));
                                 new_test.setEnabled(true);
                                 fabParent.setVisibility(View.VISIBLE);
                             } else {
+                                new_test.setTextColor(getResources().getColor(R.color.reportGrey));
+                                new_test.setEnabled(true);
+                                fabParent.setVisibility(View.VISIBLE);
+                            }
+                            if (CommonUtils.returnClickCount() >= 1000000) {
                                 new_test.setTextColor(getResources().getColor(R.color.reportGrey));
                                 new_test.setEnabled(true);
                                 fabParent.setVisibility(View.VISIBLE);
@@ -3348,6 +3583,44 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
         return "NA";
     }
 
+    private void downloadDatabase(TextView database_percentage, ProgressBar database_progress, Button
+            restart_database_download) {
+        databaseDownloadStatus = Status.UNKNOWN;
+        PRDownloader.download(CommonUtils.generateDatabaseDownloadLink(), getFilesDir().getAbsolutePath(), "old-patient-database.db")
+                .build()
+                .setOnStartOrResumeListener(() -> database_progress.setIndeterminate(false))
+                .setOnPauseListener(() -> {
+                })
+                .setOnCancelListener(() -> {
+                    database_progress.setProgress(0);
+                    database_percentage.setText("");
+                    database_progress.setIndeterminate(false);
+                })
+                .setOnProgressListener(progress -> {
+                    long progressPercent = progress.currentBytes * 100 / progress.totalBytes;
+                    database_progress.setProgress((int) progressPercent);
+                    database_percentage.setText(CommonUtils.getProgressDisplayLine(progress.currentBytes, progress.totalBytes));
+                    database_progress.setIndeterminate(false);
+                })
+                .start(new OnDownloadListener() {
+                    @Override
+                    public void onDownloadComplete() {
+
+                        databaseDownloadStatus = Status.COMPLETED;
+                        Actions.startDownloadMerging();
+                    }
+
+                    @Override
+                    public void onError(Error error) {
+                        tcDownloadStatus = Status.UNKNOWN;
+                        restart_database_download.setVisibility(View.VISIBLE);
+                        database_percentage.setText("Error while downloading");
+                        database_progress.setProgress(0);
+                        database_progress.setIndeterminate(false);
+                    }
+                });
+    }
+
     private void downloadTCUpdate(TextView tc_percentage, ProgressBar tc_progress, Button
             restart_tc_download, AppPreferencesHelper devicePref) {
         tcDownloadStatus = Status.UNKNOWN;
@@ -3472,7 +3745,10 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                     }
                     fab.setImageResource(R.drawable.baseline_close_white_18dp);
                     //fab.animate().rotationBy(45);
-                    batteryFabLayout.animate().translationY(-getResources().getDimension(R.dimen.standard_55));
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+                        batteryFabLayout.animate().translationY(-getResources().getDimension(R.dimen.standard_55));
+                    else
+                        batteryFabLayout.animate().translationY(-55);
                 } else {
                     CommonUtils.showToasty(this, "Getting Battery Info Please wait...", true, 'I');
                 }
@@ -3885,7 +4161,8 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 .setNegativeButton("Cancel", (dialog, which) -> {
                 });
         androidx.appcompat.app.AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -3900,7 +4177,8 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 .setNegativeButton("Cancel", (dialog, which) -> {
                 });
         androidx.appcompat.app.AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -3915,7 +4193,8 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 .setNegativeButton("Cancel", (dialog, which) -> {
                 });
         androidx.appcompat.app.AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -3929,7 +4208,8 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                     isTcUpdateSuccess[0] = CommonUtils.packageInstaller(MainActivity.this);
                 });
         androidx.appcompat.app.AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -3948,7 +4228,8 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
         });
 
         androidx.appcompat.app.AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -3966,7 +4247,25 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 .setNegativeButton("Cancel", (dialog, which) -> {
                 });
         androidx.appcompat.app.AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        alert.show();
+    }
+
+    void prbValidityReached() {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(new ContextThemeWrapper(this, R.style.myDialog));
+        builder.setTitle("System Alert")
+                .setMessage("PRB reaches it limit, please contact customer care")
+                .setCancelable(false)
+                .setPositiveButton("Okay", (dialog, which) -> {
+                    int count = CommonUtils.getPRBCount(MainActivity.this);
+                    String msg = "PRB reaches the limit " + count;
+                    FirebaseCrashlytics.getInstance().recordException(new PrbException(msg));
+                });
+
+        androidx.appcompat.app.AlertDialog alert = builder.create();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alert.show();
     }
 
@@ -4100,6 +4399,23 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
             }
         }
     };
+
+    void showHotSpotStatusDialog(boolean status) {
+        Context context = new ContextThemeWrapper(MainActivity.this, R.style.AppTheme2);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
+        if (status)
+            builder.setView(R.layout.dialog_initiating_hot_spot);
+        else
+            builder.setView(R.layout.dialog_turn_off_hotspot);
+        builder.setCancelable(false);
+        androidx.appcompat.app.AlertDialog dialog = builder.show();
+
+        new Handler().postDelayed(() -> {
+            if (dialog.isShowing())
+                dialog.dismiss();
+        }, 5000);
+    }
+
 
 }
 

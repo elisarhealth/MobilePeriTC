@@ -16,7 +16,7 @@
         android:title="@string/batterylevel"
         app:showAsAction="ifRoom"/>
     <item
-        android:id="@+id/action_hmd_status"
+        android:id="@+id/action_hotspot_status"
         android:orderInCategory="100"
         android:icon="@drawable/ic_wifi_tethering_on"
         android:title="@string/hotspot_status"

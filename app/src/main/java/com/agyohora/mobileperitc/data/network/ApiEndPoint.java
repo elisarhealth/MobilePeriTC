@@ -15,4 +15,6 @@ public class ApiEndPoint {
 
     public static final String DEV_UPDATE_SERVER_ENDPOINT = "https://s3-ap-southeast-1.amazonaws.com/elisar-updates/latestversiondetailsDev.json";
 
+    public static final String RESTORE_DATABASE_ENDPOINT = "https://ava-restore-db.s3-ap-southeast-1.amazonaws.com/";
+
 }

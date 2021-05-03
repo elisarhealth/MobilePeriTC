@@ -2,6 +2,7 @@ package com.agyohora.mobileperitc.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -395,8 +396,8 @@ public class LoginActivity extends AppCompatActivity {
                 .setPositiveButton("Okay", (dialog, id) -> {
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
     }
 
     void adminForgetPasswordWarning() {
@@ -410,8 +411,8 @@ public class LoginActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", (dialog, id) -> {
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
     }
 
     void startMainActivity() {
@@ -437,8 +438,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
     }
 
     void errorDialog(String title, String message) {
@@ -451,8 +452,8 @@ public class LoginActivity extends AppCompatActivity {
                     //do things
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
     }
 
     TextWatcher watcher = new TextWatcher() {

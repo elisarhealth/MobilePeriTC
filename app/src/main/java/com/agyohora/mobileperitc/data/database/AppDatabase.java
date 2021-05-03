@@ -1,6 +1,7 @@
 package com.agyohora.mobileperitc.data.database;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.util.Log;
@@ -11,8 +12,10 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import com.agyohora.mobileperitc.data.database.dao.ClickerHistoryDao;
 import com.agyohora.mobileperitc.data.database.dao.PatientInfoDao;
 import com.agyohora.mobileperitc.data.database.dao.PatientTestResultDao;
+import com.agyohora.mobileperitc.data.database.entity.ClickerHistory;
 import com.agyohora.mobileperitc.data.database.entity.PatientInfo;
 import com.agyohora.mobileperitc.data.database.entity.PatientTestResult;
 import com.agyohora.mobileperitc.myapplication.MyApplication;
@@ -31,7 +34,7 @@ import java.io.OutputStream;
  * if not we create new db instance or we restore the exisiting one
  */
 
-@Database(entities = {PatientTestResult.class, PatientInfo.class}, version = 3, exportSchema = true)
+@Database(entities = {PatientTestResult.class, PatientInfo.class, ClickerHistory.class}, version = 4, exportSchema = true)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase INSTANCE;
@@ -57,7 +60,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
             return Room.databaseBuilder(context.getApplicationContext(),
                     AppDatabase.class, "patient-database")
-                    .addMigrations(MIGRATION_2_3)
+                    .addMigrations(MIGRATION_3_4)
                     .build();
 
         } else if (backedUpFile.exists()) {
@@ -65,7 +68,7 @@ public abstract class AppDatabase extends RoomDatabase {
         }
         return Room.databaseBuilder(context.getApplicationContext(),
                 AppDatabase.class, "patient-database")
-                .addMigrations(MIGRATION_2_3)
+                .addMigrations(MIGRATION_3_4)
                 .build();
     }
 
@@ -75,7 +78,7 @@ public abstract class AppDatabase extends RoomDatabase {
             File inputFile = new File(Constants.DB_BACK_UP_FOLDER, Constants.DB_NAME + ".db");
             File outputFile = context.getDatabasePath("patient-database");
             try {
-                Log.e("restoreDataBase", "dbFile exists");
+                Log.e("copyDataBase", "dbFile exists");
                 FileInputStream fis = new FileInputStream(inputFile);
                 OutputStream os = new FileOutputStream(outputFile);
                 byte[] buffer = new byte[1024];
@@ -88,7 +91,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 fis.close();
                 bCopyOk = true;
             } catch (Exception e) {
-                Log.e("restoreDataBase", "Exception " + e.getMessage());
+                Log.e("copyDataBase", "Exception " + e.getMessage());
                 outputFile.delete();
             } finally {
                 if (bCopyOk)
@@ -96,7 +99,7 @@ public abstract class AppDatabase extends RoomDatabase {
             }
             return Room.databaseBuilder(context.getApplicationContext(),
                     AppDatabase.class, "patient-database")
-                    .addMigrations(MIGRATION_2_3)
+                    .addMigrations(MIGRATION_3_4)
                     .build();
         }
     }
@@ -120,6 +123,21 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    static final Migration MIGRATION_3_4 = new Migration(3, 4) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            Log.e("TrackMe", "MIGRATION_3_4 called");
+            Cursor cursor = database.query("SELECT * FROM PatientTestResult", null); // grab cursor for all data
+            int deleteStateColumnIndex = cursor.getColumnIndex("PerimeteryObjectVersion");  // see if the column is there
+            if (deleteStateColumnIndex < 0) {
+                // missing_column not there - add it
+                database.execSQL("ALTER TABLE PatientTestResult ADD COLUMN PerimeteryObjectVersion INTEGER NOT NULL DEFAULT 1");
+            }
+            //database.execSQL("CREATE TABLE IF NOT EXISTS`ClickerHistory` (`Id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `NatureOfChange` TEXT NOT NULL, `ServiceReportNumber` TEXT NOT NULL, `PrbSerialNumber` TEXT NOT NULL, `PrbCount` INTEGER NOT NULL, `PatientDob` TEXT NOT NULL)");
+            database.execSQL("CREATE TABLE IF NOT EXISTS `ClickerHistory` (`Id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `NatureOfChange` TEXT, `ServiceReportNumber` TEXT, `PrbSerialNumber` TEXT, `PrbCount` INTEGER NOT NULL, `created_date` TEXT)");
+        }
+    };
+
 
     private static boolean openDataBase(final Context context) {
         Log.e("openDataBase", "called");
@@ -140,4 +158,6 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract PatientTestResultDao testResultDao();
 
     public abstract PatientInfoDao patientInfoDao();
+
+    public abstract ClickerHistoryDao clickerHistoryDao();
 }

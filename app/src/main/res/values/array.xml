@@ -41,4 +41,10 @@
         <item>Full Threshold</item>
     </array>
 
+    <array name="reason">
+        <item>Select reason</item>
+        <item>PRB Change</item>
+        <item>Clicker Change</item>
+    </array>
+
 </resources>

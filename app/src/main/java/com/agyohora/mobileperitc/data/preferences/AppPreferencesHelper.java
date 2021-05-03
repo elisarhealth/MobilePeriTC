@@ -88,6 +88,7 @@ public class AppPreferencesHelper implements PreferencesHelper {
     private static final String PREF_LAST_UPDATED_ON = "pref_last_updated_on";
     private static final String PREF_DATABASE_VERSION = "pref_database_versiion";
     private static final String PREF_ORG_UPDATE = "pref_org_update";
+    private static final String PREF_PRB_COUNT = "prb_count";
 
 
     private final SharedPreferences mPrefs;
@@ -734,6 +735,16 @@ public class AppPreferencesHelper implements PreferencesHelper {
     @Override
     public void setOrgSiteUpdateStatus(boolean status) {
         mPrefs.edit().putBoolean(PREF_ORG_UPDATE, status).apply();
+    }
+
+    @Override
+    public void setPRBCount(int count) {
+        mPrefs.edit().putInt(PREF_PRB_COUNT, count).apply();
+    }
+
+    @Override
+    public int getPRBCount() {
+        return mPrefs.getInt(PREF_PRB_COUNT, 0);
     }
 
 }

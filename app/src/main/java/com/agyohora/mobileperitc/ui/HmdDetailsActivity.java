@@ -1,9 +1,11 @@
 package com.agyohora.mobileperitc.ui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Menu;
@@ -31,6 +33,7 @@ import com.agyohora.mobileperitc.store.StoreTransmitter;
 import com.agyohora.mobileperitc.utils.CommonUtils;
 import com.agyohora.mobileperitc.utils.Constants;
 import com.agyohora.mobileperitc.worksheduler.workcreator.WorkCreator;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -163,14 +166,14 @@ public class HmdDetailsActivity extends AppCompatActivity implements View.OnClic
                 StoreTransmitter.doCommFunction(StoreTransmitter.COMM_FUNCTION_STOP, bundle);
                 MyApplication.getInstance().set_HMD_CONNECTION_NEED(false);
                 MyApplication.getInstance().set_HMD_CONNECTED(false);
-                CommonUtils.turningOffHotSpotDialog(this);
+                showHotSpotStatusDialog(false);
             } else {
                 item.setIcon(R.drawable.ic_wifi_tethering_on);
                 MyApplication.getInstance().set_HMD_CONNECTION_NEED(true);
                 MyApplication.getInstance().set_HMD_CONNECTED(true);
                 isHotSpotOn = true;
                 Actions.initCommunication();
-                CommonUtils.initiatingHotSpotDialog(this);
+                showHotSpotStatusDialog(true);
             }
             return true;
         }
@@ -275,5 +278,21 @@ public class HmdDetailsActivity extends AppCompatActivity implements View.OnClic
                 activity.sync_details_now.setVisibility(View.INVISIBLE);
             }
         }
+    }
+
+    void showHotSpotStatusDialog(boolean status) {
+        Context context = new ContextThemeWrapper(HmdDetailsActivity.this, R.style.AppTheme2);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context);
+        if (status)
+            builder.setView(R.layout.dialog_initiating_hot_spot);
+        else
+            builder.setView(R.layout.dialog_turn_off_hotspot);
+        builder.setCancelable(false);
+        androidx.appcompat.app.AlertDialog dialog = builder.show();
+
+        new Handler().postDelayed(() -> {
+            if (dialog.isShowing())
+                dialog.dismiss();
+        }, 5000);
     }
 }

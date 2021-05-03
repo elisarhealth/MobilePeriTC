@@ -23,6 +23,7 @@ public class Constants {
 
 
     public static final String BUG_FIX_LOGS_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/bugfix/";
+    public static final String DATABASE_RESTORE_LOGS_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/database-restore/";
     public static final String CHRONOMETER_LOGS_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/chronometer/bugfix";
     public static final String BUG_FIX_CLICK_ACK_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/bugfix/ack";
 

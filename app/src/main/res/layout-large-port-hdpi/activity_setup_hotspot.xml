@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:ignore="MissingDefaultResource">
+
+    <Button
+        android:id="@+id/copy_hotspot_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="130dp"
+        android:layout_marginEnd="131dp"
+        android:layout_marginBottom="69dp"
+        android:onClick="settingsClickCallback"
+        android:text="Click here to Copy Hotspot Name"
+        app:layout_constraintBottom_toTopOf="@+id/copy_hotspot_password"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/copy_hotspot_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="113dp"
+        android:layout_marginEnd="113dp"
+        android:layout_marginBottom="67dp"
+        android:onClick="settingsClickCallback"
+        android:text="Click here to Copy Hotspot Password"
+        app:layout_constraintBottom_toTopOf="@+id/open_hotspot_settings"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+    <Button
+        android:id="@+id/open_hotspot_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="169dp"
+        android:layout_marginEnd="168dp"
+        android:layout_marginBottom="125dp"
+        android:text="Open Hotspot Settings"
+        android:onClick="settingsClickCallback"
+        app:layout_constraintBottom_toTopOf="@+id/textView24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/hotspot_created_continue"
+        style="@style/RoundedButtonWithArrow"
+        android:layout_width="200dp"
+        android:layout_height="52dp"
+        android:layout_marginBottom="70dp"
+        android:layout_marginEnd="39dp"
+        android:layout_marginStart="270dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="settingsClickCallback"
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp"
+        android:text="@string/continueButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView24"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="42dp"
+        android:layout_marginEnd="51dp"
+        android:visibility="invisible"
+        android:layout_marginBottom="114dp"
+        android:text="Step 1. Copy Hotspot name then click open hotspot settings to paste it"
+        app:layout_constraintBottom_toTopOf="@+id/hotspot_created_continue"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

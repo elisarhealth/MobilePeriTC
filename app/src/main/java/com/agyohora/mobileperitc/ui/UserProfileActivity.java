@@ -2,6 +2,7 @@ package com.agyohora.mobileperitc.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -85,8 +86,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 .setNegativeButton("Cancel", (dialog, id) -> {
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
     }
 
     void switchProfile() {
@@ -105,8 +106,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     closeKeyboard(pass);
                 });
         alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
         Button positiveButton = alert.getButton(AlertDialog.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(this);
 
@@ -150,8 +151,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 .setPositiveButton("Okay", (dialog, id) -> {
                 });
         AlertDialog alert = builder.create();
-        alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        alert.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
     }
 }
 

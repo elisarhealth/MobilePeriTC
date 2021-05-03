@@ -262,5 +262,9 @@ interface PreferencesHelper {
 
     void setOrgSiteUpdateStatus(boolean status);
 
+    void setPRBCount(int count);
+
+    int getPRBCount();
+
 
 }

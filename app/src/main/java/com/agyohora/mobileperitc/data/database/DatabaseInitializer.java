@@ -6,6 +6,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.agyohora.mobileperitc.data.database.entity.ClickerHistory;
 import com.agyohora.mobileperitc.data.database.entity.PatientInfo;
 import com.agyohora.mobileperitc.data.database.entity.PatientTestResult;
 import com.agyohora.mobileperitc.data.preferences.AppPreferencesHelper;
@@ -89,11 +90,21 @@ public class DatabaseInitializer {
         return result;
     }
 
+    public static int insertClickerInfo(final AppDatabase db, ClickerHistory history) {
+        long result[] = db.clickerHistoryDao().insertAll(history);
+        Log.d("insertResult", " " + result[0]);
+        return (int) result[0];
+    }
+
+    public static List<ClickerHistory> getClickerHistory(AppDatabase db) {
+        return db.clickerHistoryDao().getClickerHistory();
+    }
+
     public static int getCount(@NonNull final AppDatabase db) {
         return db.testResultDao().countRows();
     }
 
-    private static int getMrnCount(@NonNull final AppDatabase db, String mrn) {
+    public static int getMrnCount(@NonNull final AppDatabase db, String mrn) {
         return db.patientInfoDao().countRows(mrn);
     }
 
@@ -169,6 +180,42 @@ public class DatabaseInitializer {
 
     public static int updateTestData(AppDatabase db, String id, byte[] data, int perimetryObjectVersion) {
         return db.testResultDao().updateTestData(id, data, perimetryObjectVersion);
+    }
+
+    //Get all PatientInfo
+
+    public static List<PatientInfo> getAllPatientInfoByMrn(AppDatabase db, String mrn) {
+        return db.patientInfoDao().getAllPatientInfoByMrn(mrn);
+    }
+
+    public static List<PatientInfo> getAllPatientInfoFromOldDB(OldDatabase db) {
+        return db.patientInfoDao().getAllPatientInfo();
+    }
+
+    public static List<PatientTestResult> getAllTestResultsFromOldDB(OldDatabase db, String mrn) {
+        return db.testResultDao().getAllPatientResults(mrn);
+    }
+
+    public static int getMrnCountFromOldDB(@NonNull final OldDatabase db, String mrn) {
+        return db.patientInfoDao().countRows(mrn);
+    }
+
+    public static int getNumberOfTestRecordsOfOldBD(@NonNull final OldDatabase db) {
+        return db.testResultDao().countRows();
+    }
+
+    public static String getPatientName(@NonNull final AppDatabase db, String mrn) {
+        return db.patientInfoDao().getPatientName(mrn);
+    }
+
+    public static PatientTestResult getByMRN(AppDatabase db, String id) {
+        return db.testResultDao().findByMRN(id);
+    }
+
+    public static boolean findIsTestDataAlreadyThere(AppDatabase db, String mrn, String patientName, String strategy, String pattern, String createdDate) {
+        int count = db.testResultDao().isTestResultPresent(mrn, patientName, strategy, pattern, createdDate);
+        Log.e("Count ", " " + count);
+        return count > 0;
     }
 
 
@@ -252,6 +299,7 @@ public class DatabaseInitializer {
         @Override
         protected Integer doInBackground(final Void... params) {
             PatientInfo patientInfo = new PatientInfo();
+
             patientInfo.setPatientName(mPatName);
             patientInfo.setPatientMrn(mPatMrn);
             patientInfo.setPatientMobile(mPatMobile);
@@ -259,7 +307,9 @@ public class DatabaseInitializer {
             patientInfo.setPatientSex(mPatSex);
             if (getMrnCount(mDb, mPatMrn) > 0) {
                 Log.d("InsertPatientInfo", "updatePatientInfo ");
-                return updatePatientInfo(mDb, patientInfo);
+                int isItUpdated = updatePatientInfo(mDb, patientInfo);
+                Log.e("isItUpdated", " " + isItUpdated);
+                return patientInfo.getId();
             } else {
                 Log.d("InsertPatientInfo", "insertPatientInfo");
                 return insertPatientInfo(mDb, patientInfo);
