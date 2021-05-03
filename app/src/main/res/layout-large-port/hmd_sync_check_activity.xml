@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#ffffff"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:ignore="MissingDefaultResource">
+
+    <LinearLayout
+        android:id="@+id/progressBar"
+        android:layout_width="400dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="61dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="4"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_weight="1"
+            android:id="@+id/stepOne"
+            android:background="@drawable/progress_bar_grey"
+            android:clickable="false" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_weight="0.5"
+            android:clickable="false" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_weight="1"
+            android:id="@+id/stepTwo"
+            android:background="@drawable/progress_bar_grey"
+            android:clickable="false" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_weight="0.5" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="15dp"
+            android:layout_weight="1"
+            android:id="@+id/stepThree"
+            android:background="@drawable/progress_bar_grey"
+            android:clickable="false" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/linearLayout7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="40dp"
+        android:animateLayoutChanges="true"
+        android:background="@color/transparent_bg"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressBar">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/hotspot_card"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:onClick="settingsClickCallback"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|start"
+                android:saveEnabled="true"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="35dp"
+                    android:background="@drawable/ic_wifi_tethering"
+                    android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/hotspot_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="22dp"
+                    android:gravity="center"
+                    android:text="@string/initializing_hotspot"
+                    android:textColor="@color/primaryTwo"
+                    android:textSize="28sp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/hmd_card"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:onClick="settingsClickCallback"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|start"
+                android:orientation="horizontal">
+
+                <Button
+                    android:layout_width="63dp"
+                    android:layout_height="38dp"
+                    android:layout_marginStart="35dp"
+                    android:background="@drawable/vr_float_purple_new"
+                    android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/hmd_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="22dp"
+                    android:gravity="center"
+                    android:text="@string/waiting_for_hmd_connection"
+                    android:textColor="@color/primaryTwo"
+                    android:textSize="24sp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/sync_card"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:onClick="settingsClickCallback"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|start"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="35dp"
+                    android:background="@drawable/ic_sync"
+                    android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/sync_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="22dp"
+                    android:gravity="center"
+                    android:text="@string/syncing_please_wait"
+                    android:textColor="@color/primaryTwo"
+                    android:textSize="28sp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/hmd_sync_proceed_button"
+        style="@style/RoundedButtonWithArrow"
+        android:layout_width="200dp"
+        android:layout_height="52dp"
+        android:layout_marginBottom="35dp"
+        android:layout_marginEnd="39dp"
+        android:layout_marginStart="361dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="settingsClickCallback"
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp"
+        android:text="@string/continueButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

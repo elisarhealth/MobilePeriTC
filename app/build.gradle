@@ -1,36 +1,150 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.jakewharton.hugo'
+apply plugin: 'com.google.firebase.crashlytics'
+
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    signingConfigs {
+        debug {
+            storeFile file('/home/sankar/Android/key/elisar_debug.jks')
+            storePassword 'elisar'
+            keyAlias = 'elisar_debug'
+            keyPassword 'elisar'
+        }
+        release {
+            storeFile file('/home/sankar/Android/key/elisar_release.jks')
+            storePassword 'elisar'
+            keyAlias = 'elisar_release'
+            keyPassword 'elisar'
+        }
+    }
+    compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.agyohora.mobileperitc"
-        minSdkVersion 23
-        targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        minSdkVersion rootProject.ext.minimumSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode generateVersionCode()
+        versionName generateVersionName()
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.release
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+        setProperty("archivesBaseName", "MobilePeriTC-$versionName-${getDate()}")
     }
     buildTypes {
         release {
             minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField("String", "BASE_URL", "\"http://ec2-54-175-251-117.compute-1.amazonaws.com/api/testresult/postResult\"")
+            buildConfigField("String", "API_KEY", "\"ff9ed231-a938-4878-8549-c288e90789d4\"")
+            buildConfigField("String", "HMD_ID", "\"HMD0001\"")
+            buildConfigField("String", "ORG_NAME", "\"ELISAR\"")
+            buildConfigField("String", "BATCH", "\"ELISAR\"")
+            buildConfigField("String", "USER", "\"PROD\"")
+            buildConfigField "boolean", "ACTIVATE_KIOSK", "false"
+            buildConfigField "boolean", "DEV_BUILD", "false"
+            signingConfig signingConfigs.release
+        }
+        debug {
+            buildConfigField("String", "BASE_URL", "\"http://ec2-54-175-251-117.compute-1.amazonaws.com/api/testresult/postResult\"")
+            buildConfigField("String", "API_KEY", "\"ff9ed231-a938-4878-8549-c288e90789d4\"")
+            buildConfigField("String", "HMD_ID", "\"HMD0001\"")
+            buildConfigField("String", "ORG_NAME", "\"ELISAR\"")
+            buildConfigField("String", "BATCH", "\"ELISAR\"")
+            buildConfigField("String", "USER", "\"DEV\"")
+            buildConfigField "boolean", "ACTIVATE_KIOSK", "false"
+            buildConfigField "boolean", "DEV_BUILD", "true"
+            signingConfig signingConfigs.debug
+            manifestPlaceholders = [:]
+            resValue("string", "PORT_NUMBER", "8081")
+            //applicationIdSuffix '.debug'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildToolsVersion '28.0.3'
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
 }
 
+private Integer generateVersionCode() {
+    return rootProject.ext.minimumSdkVersion * 10000000 + rootProject.ext.versionMajor * 10000 + rootProject.ext.versionMinor * 100 + rootProject.ext.versionPatch
+}
+
+private String generateVersionName() {
+    /*String versionName = "${rootProject.ext.versionMajor}.${rootProject.ext.versionMinor}.${rootProject.ext.versionPatch}"
+
+    if (rootProject.ext.versionClassifier != null) {
+        versionName += "-" + rootProject.ext.versionClassifier
+    }*/
+    String versionClassifier = "Oct30"
+    String versionName = "2.2.0-R"
+
+    if (versionClassifier != null) {
+        //versionName += "-" + versionClassifier
+    }
+    return versionName
+}
+
+static def getDate() {
+    return new Date().format('dd-MM-yyyy')
+}
+
+
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.google.code.gson:gson:2.2.4'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:design:25.3.1'
-    testCompile 'junit:junit:4.12'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.3'
+    implementation 'androidx.room:room-runtime:2.2.5'
+    annotationProcessor 'androidx.room:room-compiler:2.2.5'
+    implementation 'androidx.work:work-runtime:2.4.0'
+    implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+
+    implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
+    implementation 'com.google.firebase:firebase-analytics:18.0.0'
+    implementation 'com.google.firebase:firebase-auth:20.0.0'
+
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+    implementation 'com.mindorks.android:prdownloader:0.4.0'
+    implementation 'com.journeyapps:zxing-android-embedded:3.5.0'
+
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.4'
+    implementation 'com.github.GrenderG:Toasty:1.4.2'
+
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
+
+    implementation "androidx.navigation:navigation-fragment:2.3.1"
+    implementation "androidx.navigation:navigation-ui:2.3.1"
+    implementation "androidx.navigation:navigation-dynamic-features-fragment:2.3.1"
+
+    implementation "androidx.browser:browser:1.2.0"
+
+    //implementation 'com.facebook.shimmer:shimmer:0.5.0'
+
+
+
+
+    implementation("com.google.guava:guava:30.0-android")
+   // implementation "com.polidea.rxandroidble2:rxandroidble:1.11.1"
+
+    implementation "com.airbnb.android:lottie:3.4.0"
+
+    testImplementation 'junit:junit:4.12'
 }

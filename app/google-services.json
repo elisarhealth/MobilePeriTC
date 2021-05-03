@@ -1,0 +1,109 @@
+{
+  "project_info": {
+    "project_number": "741807787233",
+    "firebase_url": "https://mobileperimeter.firebaseio.com",
+    "project_id": "mobileperimeter",
+    "storage_bucket": "mobileperimeter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:741807787233:android:7a4fe2256757178c",
+        "android_client_info": {
+          "package_name": "com.Agyohora.MobilePerimeter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "741807787233-3232tu7r1e60obetb57m1nf041j3d30l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Agyohora.MobilePerimeter",
+            "certificate_hash": "d119621a41b0a125e7aba78663b9914fd873674e"
+          }
+        },
+        {
+          "client_id": "741807787233-pu0va0rf129haddj6hbokqhmlhcgtdkd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Agyohora.MobilePerimeter",
+            "certificate_hash": "dc0c26a55069a9b4ca0008fd53e3e961b7085e02"
+          }
+        },
+        {
+          "client_id": "741807787233-uoh4qm4s2ci2oa2j9u5aoj6i9fhmv5a2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.Agyohora.MobilePerimeter",
+            "certificate_hash": "3a5bdacb980475b6b287d51a393506ea15a5f87a"
+          }
+        },
+        {
+          "client_id": "741807787233-gqbbo357dno1s6ukpen5pkfs9qa3kn21.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHGNY4BiKp5N1VvBdRFWx59ANxxGaqQyA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "741807787233-gqbbo357dno1s6ukpen5pkfs9qa3kn21.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:741807787233:android:9097e715885ea9b9",
+        "android_client_info": {
+          "package_name": "com.agyohora.mobileperitc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "741807787233-u6tki5r0b2pgg8s4oidbjk2c738kv2en.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.agyohora.mobileperitc",
+            "certificate_hash": "d119621a41b0a125e7aba78663b9914fd873674e"
+          }
+        },
+        {
+          "client_id": "741807787233-cc4tiqmi5o16uj4dv5do2eg0e2goduve.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.agyohora.mobileperitc",
+            "certificate_hash": "dc0c26a55069a9b4ca0008fd53e3e961b7085e02"
+          }
+        },
+        {
+          "client_id": "741807787233-gqbbo357dno1s6ukpen5pkfs9qa3kn21.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHGNY4BiKp5N1VvBdRFWx59ANxxGaqQyA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "741807787233-gqbbo357dno1s6ukpen5pkfs9qa3kn21.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

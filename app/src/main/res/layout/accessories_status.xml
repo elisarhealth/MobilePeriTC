@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <View
+            android:id="@+id/back_view"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="@color/primaryTwo" />
+
+        <LinearLayout
+            android:id="@+id/front_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="52dp"
+            android:layout_marginEnd="51dp"
+            android:background="@drawable/rounded_corner"
+            android:elevation="5dp"
+            android:gravity="start|center"
+            android:orientation="horizontal"
+
+            android:padding="5dp"
+            app:layout_anchor="@id/back_view"
+            app:layout_anchorGravity="bottom|center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:gravity="center"
+                android:text="@string/accessories_status"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:animateLayoutChanges="true"
+        android:background="@color/transparent_bg"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/coordinatorLayout">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/eyeTrackerStatusCard"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="10dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|start"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="35dp"
+                    android:contentDescription="@string/imageDescription"
+                    android:gravity="center"
+                    android:src="@drawable/ic_remove_red_eye" />
+
+                <TextView
+                    android:id="@+id/eyeTrackingStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="22dp"
+                    android:gravity="center"
+                    android:text="@string/checking_eye_tracker"
+                    android:textColor="@color/primaryTwo"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/clickerStatusCard"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="10dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|start"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="35dp"
+                    android:contentDescription="@string/imageDescription"
+                    android:gravity="center"
+                    android:src="@drawable/ic_radio_button_checked" />
+
+                <TextView
+                    android:id="@+id/clicker_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="22dp"
+                    android:gravity="center"
+                    android:text="@string/checking_clicker"
+                    android:textColor="@color/primaryTwo"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/displayStatusCard"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="10dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|start"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="35dp"
+                    android:contentDescription="@string/imageDescription"
+                    android:gravity="center"
+                    android:src="@drawable/ic_stay_current_landscape" />
+
+                <TextView
+                    android:id="@+id/display_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_marginStart="22dp"
+                    android:gravity="center"
+                    android:text="@string/checking_display"
+                    android:textColor="@color/primaryTwo"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/accessory_error_cardView"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="12dp"
+            android:visibility="invisible"
+            app:cardElevation="2dp">
+
+            <TextView
+                android:id="@+id/accessory_error_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="35dp"
+                android:gravity="start"
+                android:textColor="@color/primaryTwo"
+                android:textSize="16sp" />
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/accessoryCheckOkay"
+        android:layout_width="wrap_content"
+        android:layout_height="52dp"
+        android:layout_marginEnd="56dp"
+        android:layout_marginBottom="48dp"
+        android:background="@drawable/rounded_colored_corner_with_white_filled"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="clickCallback"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:text="@string/proceed"
+        android:textColor="@color/primaryTwo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/accessoryAbortTest"
+        android:layout_width="wrap_content"
+        android:layout_height="52dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginEnd="53dp"
+        android:layout_marginBottom="48dp"
+        android:background="@drawable/rounded_colored_corner_with_white_filled"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="clickCallback"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:text="Abort"
+        android:textColor="@color/primaryTwo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/accessoryContactSupport"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/accessoryContactSupport"
+        android:layout_width="wrap_content"
+        android:layout_height="52dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginBottom="48dp"
+        android:background="@drawable/rounded_colored_corner_with_white_filled"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="clickCallback"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:text="Contact Support"
+        android:textColor="@color/primaryTwo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/accessoryCheckOkay" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

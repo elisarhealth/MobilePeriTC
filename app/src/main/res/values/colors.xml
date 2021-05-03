@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryDark">#276aca</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="navigation_bar_color">#00ffffff</color>
+    <color name="transparent_bg">#00ffffff</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#ff000000</color>
+    <color name="near_by_white">#faf6f6</color>
+    <color name="light_grey">#e6e6e6</color>
+    <color name="reportView_grey">#7d000000</color>
+    <color name="tab_indicator_color">#ff9803</color>
+    <color name="green">#c0ca33</color>
+    <color name="report_background">#fafafa</color>
+    <color name="backgroundGrey">#bfbfbf</color>
+    <color name="reportGrey">#dcdcdc</color>
+    <color name="reportTextGrey">#ebebeb</color>
+    <color name="first">#82212121</color>
+    <color name="second">#6e212121</color>
+    <color name="third">#5a212121</color>
+    <color name="fourth">#35212121</color>
+
+    <color name="primaryOne">#FF6A13</color>
+    <color name="primaryTwo">#452B6F</color>
+
+    <color name="infoColor">#452B6F</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>

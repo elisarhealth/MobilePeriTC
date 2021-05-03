@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="strategies">
+        <item>Select test strategy</item>
+        <item>Screening</item>
+        <item>Full Threshold</item>
+        <item>Elisar Zest</item>
+        <item>Elisar Fast</item>
+    </array>
+
+    <array name="pattern">
+        <item>Select test pattern</item>
+        <item>24-2</item>
+        <item>30-2</item>
+        <item>10-2</item>
+        <!-- <item>Macula</item>-->
+    </array>
+
+    <array name="twenty_four_dash_two_strategies">
+        <item>Select test strategy</item>
+        <item>Screening</item>
+        <item>Full Threshold</item>
+        <item>Elisar Zest</item>
+        <item>Elisar Fast</item>
+    </array>
+
+    <array name="thirty_dash_two_strategies">
+        <item>Select test strategy</item>
+        <item>Screening</item>
+        <item>Full Threshold</item>
+        <item>Elisar Zest</item>
+        <item>Elisar Fast</item>
+    </array>
+
+    <array name="ten_dash_two_strategies">
+        <item>Select test strategy</item>
+        <item>Elisar Zest*</item>
+    </array>
+
+    <array name="macula_strategies">
+        <item>Full Threshold</item>
+    </array>
+
+</resources>

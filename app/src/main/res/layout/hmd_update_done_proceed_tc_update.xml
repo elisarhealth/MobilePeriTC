@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <View
+            android:id="@+id/back_view"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="@color/primaryTwo" />
+
+        <LinearLayout
+            android:id="@+id/front_view"
+            android:layout_width="497dp"
+            android:layout_height="850dp"
+            android:layout_marginStart="52dp"
+            android:layout_marginEnd="51dp"
+            android:background="@drawable/rounded_corner_white"
+            android:elevation="5dp"
+            android:orientation="vertical"
+            android:padding="5dp"
+            app:layout_anchor="@id/back_view"
+            app:layout_anchorGravity="bottom|center">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="70dp"
+                android:gravity="center"
+                android:text="HMD Update Done"
+                android:textColor="#4a4a4a"
+                android:textSize="36sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="TC is ready to update"
+                android:textColor="#767676"
+                android:textSize="28sp" />
+
+            <TextView
+                android:id="@+id/message"
+                android:layout_width="367dp"
+                android:layout_height="322dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="64dp"
+                android:gravity="center"
+                android:text="Please proceed TC update"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/update_tc_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_colored_corner_with_white_filled"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="64dp"
+                android:onClick="clickCallback"
+                android:padding="@dimen/standard_12"
+                android:text="Update TC"
+                android:textColor="@color/primaryTwo" />
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
