@@ -5,6 +5,7 @@ import android.util.Log;
 
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
@@ -15,8 +16,11 @@ import com.agyohora.mobileperitc.worksheduler.works.AppUpdaterWorker;
 import com.agyohora.mobileperitc.worksheduler.works.CheckForUpdatesWorker;
 import com.agyohora.mobileperitc.worksheduler.works.DailyReportWork;
 import com.agyohora.mobileperitc.worksheduler.works.DatabaseBackupWorker;
+import com.agyohora.mobileperitc.worksheduler.works.NineLReachedWorker;
+import com.agyohora.mobileperitc.worksheduler.works.PrbUpdatedByServiceWork;
 import com.agyohora.mobileperitc.worksheduler.works.RunImmediatelyWorker;
 import com.agyohora.mobileperitc.worksheduler.works.SaveAsJsonWorker;
+import com.agyohora.mobileperitc.worksheduler.works.SixLReachedWorker;
 import com.agyohora.mobileperitc.worksheduler.works.SyncDbWorker;
 
 import java.util.concurrent.TimeUnit;
@@ -73,6 +77,39 @@ public class WorkCreator {
         immediateSyncWorkBuilder.setConstraints(constraints);
         OneTimeWorkRequest oneTimeWorkRequest = immediateSyncWorkBuilder.build();
         WorkManager.getInstance(workContext).enqueue(oneTimeWorkRequest);
+    }
+
+    public void reached6LCountWork() {
+        Log.e("reached6LCountWork", "called");
+        OneTimeWorkRequest.Builder immediateSyncWorkBuilder = new OneTimeWorkRequest.Builder(SixLReachedWorker.class)
+                .addTag("reached6LCountWork");
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED).build();
+        immediateSyncWorkBuilder.setConstraints(constraints);
+        OneTimeWorkRequest oneTimeWorkRequest = immediateSyncWorkBuilder.build();
+        WorkManager.getInstance(workContext).enqueueUniqueWork("reached6LCountWork", ExistingWorkPolicy.REPLACE, oneTimeWorkRequest);
+    }
+
+    public void reached9LCountWork() {
+        Log.e("reached9LCountWork", "called");
+        OneTimeWorkRequest.Builder immediateSyncWorkBuilder = new OneTimeWorkRequest.Builder(NineLReachedWorker.class)
+                .addTag("reached9LCountWork");
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED).build();
+        immediateSyncWorkBuilder.setConstraints(constraints);
+        OneTimeWorkRequest oneTimeWorkRequest = immediateSyncWorkBuilder.build();
+        WorkManager.getInstance(workContext).enqueueUniqueWork("reached9LCountWork", ExistingWorkPolicy.REPLACE, oneTimeWorkRequest);
+    }
+
+    public void prbUpdatedByServiceWork() {
+        Log.e("prbUpdatedByServiceWork", "called");
+        OneTimeWorkRequest.Builder immediateSyncWorkBuilder = new OneTimeWorkRequest.Builder(PrbUpdatedByServiceWork.class)
+                .addTag("prbUpdatedByServiceWork");
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED).build();
+        immediateSyncWorkBuilder.setConstraints(constraints);
+        OneTimeWorkRequest oneTimeWorkRequest = immediateSyncWorkBuilder.build();
+        WorkManager.getInstance(workContext).enqueueUniqueWork("prbUpdatedByServiceWork", ExistingWorkPolicy.REPLACE, oneTimeWorkRequest);
     }
 
     public void runImmediateSentNumberOfTestWork() {

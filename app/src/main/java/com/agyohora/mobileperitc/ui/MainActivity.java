@@ -1253,22 +1253,12 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 Log.e("returnClickCount", " " + prbCount);
                 if (!CommonUtils.is_TC_HMD_Version_Matches()) {
                     versionMismatchDialog();
-                } else if (prbCount >= 1000000) {
+                } else if (prbCount >= 900000) {
                     prbValidityReached();
-                } /*else if (CommonUtils.isMobileDataOn(this)) {
-                    if (CommonUtils.returnClickCount() > 600000) {
-                        int count = CommonUtils.getPRBCount(MainActivity.this);
-                        FirebaseCrashlytics.getInstance().recordException(new PrbException("PRB reaches the limit " + count));
-                    }
-                    if (CommonUtils.getNetworkType(this).equalsIgnoreCase("2g")) {
-                        CommonUtils.openMobileData(this);
-                    } else {
-                        checkCriticalUpdateAndContinue();
-                    }
-                } */ else {
+                    new WorkCreator(this).reached9LCountWork();
+                } else {
                     if (prbCount >= 600000) {
-                        String msg = "PRB reaches the limit " + prbCount;
-                        FirebaseCrashlytics.getInstance().recordException(new PrbException(msg));
+                        new WorkCreator(this).reached6LCountWork();
                     }
                     checkCriticalUpdateAndContinue();
                 }
@@ -2530,10 +2520,13 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                                 new_test.setEnabled(true);
                                 fabParent.setVisibility(View.VISIBLE);
                             }
-                            if (CommonUtils.returnClickCount() >= 1000000) {
+                            if (CommonUtils.returnClickCount() >= 900000) {
                                 new_test.setTextColor(getResources().getColor(R.color.reportGrey));
                                 new_test.setEnabled(true);
                                 fabParent.setVisibility(View.VISIBLE);
+                            }
+                            if (CommonUtils.returnClickCount() > 600000) {
+                                new WorkCreator(this).reached6LCountWork();
                             }
                         } else {
                             new_test.setTextColor(getResources().getColor(R.color.reportGrey));
@@ -4258,9 +4251,6 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 .setMessage("PRB reaches it limit, please contact customer care")
                 .setCancelable(false)
                 .setPositiveButton("Okay", (dialog, which) -> {
-                    int count = CommonUtils.getPRBCount(MainActivity.this);
-                    String msg = "PRB reaches the limit " + count;
-                    FirebaseCrashlytics.getInstance().recordException(new PrbException(msg));
                 });
 
         androidx.appcompat.app.AlertDialog alert = builder.create();

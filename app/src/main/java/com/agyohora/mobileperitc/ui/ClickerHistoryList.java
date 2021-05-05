@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +21,7 @@ import com.agyohora.mobileperitc.data.database.entity.ClickerHistory;
 import com.agyohora.mobileperitc.model.ClickerHistoryModel;
 import com.agyohora.mobileperitc.model.ResultModel;
 import com.agyohora.mobileperitc.myapplication.MyApplication;
+import com.agyohora.mobileperitc.utils.CommonUtils;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
@@ -41,7 +43,8 @@ public class ClickerHistoryList extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_clicker_history);
         getSupportActionBar().setElevation(0);
-
+        int count = CommonUtils.getPRBCount(this);
+        Toast.makeText(this, "Current PRB Count " + count, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -138,8 +141,8 @@ public class ClickerHistoryList extends AppCompatActivity {
             } else {
                 Log.d("Count", "Zero");
                 activity.empty.setVisibility(View.VISIBLE);
-               // activity.mRecyclerView.setAdapter(activity.mAdapter);
-               // activity.mAdapter.notifyDataSetChanged();
+                // activity.mRecyclerView.setAdapter(activity.mAdapter);
+                // activity.mAdapter.notifyDataSetChanged();
             }
         }
     }

@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.agyohora.mobileperitc.BuildConfig;
 import com.agyohora.mobileperitc.data.database.AppDatabase;
 import com.agyohora.mobileperitc.data.database.entity.PatientTestResult;
 import com.agyohora.mobileperitc.data.network.AppApiHelper;
@@ -42,6 +43,14 @@ public class RunImmediatelyWorker extends Worker {
         Log.e("runImmediateSyncWork","doWork called");
         List<PatientTestResult> patientTestResults = getUnSyncedData(AppDatabase.getAppDatabase(MyApplication.getInstance()));
         Log.e(TAG, "UnSynced data size " + patientTestResults.size());
+
+        if(BuildConfig.IN21_012_EyeTracking){
+            //piece of code
+        }
+        if (BuildConfig.IN21_012_IdleTimer) {
+            //piece of code
+        }
+
 
         try {
             if (patientTestResults.size() > 0)

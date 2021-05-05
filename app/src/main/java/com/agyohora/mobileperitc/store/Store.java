@@ -1512,7 +1512,7 @@ public class Store {
     }
 
     private static void sendProductionSetUpStatus() {
-        Log.e("sendProductionSetUpStatus", "called");
+        Log.e("ProductionSetUpStatus", "called");
         AppPreferencesHelper appPreferencesHelper = new AppPreferencesHelper(MyApplication.getInstance(), DEVICE_PREF);
         buttonClickData.buttonName = "ProductionSetupStatus";
         buttonClickData.buttonData = "" + appPreferencesHelper.getProductionSetUpStatus();
@@ -2605,7 +2605,8 @@ public class Store {
 
         androidx.appcompat.app.AlertDialog alert = builder.create();
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);        alert.show();
+            alert.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        alert.show();
     }
 
     private static void showBatteryStatus(Context context, String hmdBatteryLevel, int tcBatteryLevel) {

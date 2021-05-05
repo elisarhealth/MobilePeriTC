@@ -32,6 +32,7 @@ import com.agyohora.mobileperitc.interfaces.AsyncDbInsertRecordTask;
 import com.agyohora.mobileperitc.myapplication.MyApplication;
 import com.agyohora.mobileperitc.store.Store;
 import com.agyohora.mobileperitc.utils.CommonUtils;
+import com.agyohora.mobileperitc.worksheduler.workcreator.WorkCreator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -149,6 +150,7 @@ public class ClickerManagement extends AppCompatActivity implements View.OnClick
             Actions.doPrbUpdate();
             writeToConfigFile(prb_serial_value.getText().toString());
             Toast.makeText(this, "PRB Details Updated", Toast.LENGTH_SHORT).show();
+            new WorkCreator(this).prbUpdatedByServiceWork();
             finish();
         } else {
             Toast.makeText(this, "Please check HMD connection", Toast.LENGTH_SHORT).show();
