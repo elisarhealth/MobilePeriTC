@@ -44,14 +44,6 @@ public class RunImmediatelyWorker extends Worker {
         List<PatientTestResult> patientTestResults = getUnSyncedData(AppDatabase.getAppDatabase(MyApplication.getInstance()));
         Log.e(TAG, "UnSynced data size " + patientTestResults.size());
 
-        if(BuildConfig.IN21_012_EyeTracking){
-            //piece of code
-        }
-        if (BuildConfig.IN21_012_IdleTimer) {
-            //piece of code
-        }
-
-
         try {
             if (patientTestResults.size() > 0)
                 for (PatientTestResult patientTestResult : patientTestResults) {

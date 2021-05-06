@@ -4248,7 +4248,7 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
     void prbValidityReached() {
         androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(new ContextThemeWrapper(this, R.style.myDialog));
         builder.setTitle("System Alert")
-                .setMessage("PRB reaches it limit, please contact customer care")
+                .setMessage("The PRB has to be serviced before conducting further tests. Please contact your service partner immediately")
                 .setCancelable(false)
                 .setPositiveButton("Okay", (dialog, which) -> {
                 });
