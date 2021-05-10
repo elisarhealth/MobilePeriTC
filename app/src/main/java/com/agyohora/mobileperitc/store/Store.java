@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.agyohora.mobileperitc.BuildConfig;
 import com.agyohora.mobileperitc.R;
 import com.agyohora.mobileperitc.actions.Actions;
 import com.agyohora.mobileperitc.asynctasks.InsertRecordIntoDb;
@@ -189,6 +190,7 @@ public class Store {
     private static int FL_Denominator = 0;
     private static int FN_Numerator = 0;
     private static int FN_Denominator = 0;
+    public static boolean isDisplayStatusUpdated = false;
     private static String ght = " ";
     private static String vfi = " ";
     private static double PD_Probabiltiy = 0;
@@ -1531,7 +1533,11 @@ public class Store {
         preTestPrbCounter = 0;
         stateBundle.putBoolean("dt_chronometerOn", false);
         stateBundle.clear();
-
+        if (BuildConfig.IN21_012_PRB_Status) {
+            isDisplayStatusUpdated = false;
+            lastFiveDisplayStatus.clear();
+        }
+        // lastFiveDisplayStatus = new CircularFifoQueue<>(5);
         Log.d("InStore", "ACTION_PATIENT_DETAILS reached");
         if (communicationActive) {
             Log.d("InStore", "communicationActive");
@@ -1669,67 +1675,143 @@ public class Store {
                     break;
 
                 case "CLICKER_STATUS":
-                    Log.e("CLICKER_STATUS", " " + data);
-                    accessoriesChecked = "Clicker";
-                    if (data.equals("ALIVE"))
-                        clickerStatus = ClickerStatus.CLICKER_OK;
-                    else if (data.equals("DISC"))
-                        clickerStatus = ClickerStatus.CLICKER_NOT_OK;
-                    if (activeView_number == R.layout.accessories_status) {
-                        StoreTransmitter.updatedUIState("CLICKER_STATUS");
+                    if (BuildConfig.IN21_012_PRB_Status) {
+                        Log.e("CLICKER_STATUS", " " + data);
+                        accessoriesChecked = "Clicker";
+                        if (data.equals("ALIVE"))
+                            clickerStatus = ClickerStatus.CLICKER_OK;
+                        else if (data.equals("DISC")) {
+                            clickerStatus = ClickerStatus.CLICKER_NOT_OK;
+                            Actions.getActionGetPrbStatus();
+                        }
+                        if (activeView_number == R.layout.accessories_status) {
+                            StoreTransmitter.updatedUIState("CLICKER_STATUS");
+                        }
+                    } else {
+                        Log.e("CLICKER_STATUS", " " + data);
+                        accessoriesChecked = "Clicker";
+                        if (data.equals("ALIVE"))
+                            clickerStatus = ClickerStatus.CLICKER_OK;
+                        else if (data.equals("DISC"))
+                            clickerStatus = ClickerStatus.CLICKER_NOT_OK;
+                        if (activeView_number == R.layout.accessories_status) {
+                            StoreTransmitter.updatedUIState("CLICKER_STATUS");
+                        }
                     }
                     break;
                 case "DISPLAY_STATUS":
-                    String lastFiveStatuses = devicePreferencesHelper.getLastFiveDisplayStatusString();
-                    if (lastFiveStatuses != null) {
-                        String[] text = gson.fromJson(lastFiveStatuses, String[].class);
-                        List<String> statuses = Arrays.asList(text);
-                        for (String e : statuses) {
-                            Log.e("Statuses", "" + e);
+                    if (BuildConfig.IN21_012_PRB_Status) {
+                        String lastFiveStatuses = devicePreferencesHelper.getLastFiveDisplayStatusString();
+                        Log.e("lastFiveDisplayStatus", " " + lastFiveDisplayStatus.size());
+                        if (lastFiveStatuses != null && !isDisplayStatusUpdated) {
+                            String[] text = gson.fromJson(lastFiveStatuses, String[].class);
+                            List<String> statuses = Arrays.asList(text);
+                            for (String e : statuses) {
+                                Log.e("lastFiveDisplayStatus", "statuses " + e);
+                            }
+                            lastFiveDisplayStatus.addAll(statuses);
                         }
-                        lastFiveDisplayStatus.addAll(statuses);
-                    }
+                        Log.e("lastFiveDisplayStatus", " " + lastFiveDisplayStatus.size());
+                        Log.e("lastFiveDisplayStatus", " " + isDisplayStatusUpdated);
+                        accessoriesChecked = "Display";
+                        displayStatusFromHMD = (data.split(" ")[0]);
+                        screenBrightnessLevelPD1String = data.split(" ")[1];
+                        screenBrightnessLevelPD2String = data.split(" ")[2];
+                        Log.e("DISPLAY_STATUS", " screenBrightnessLevelPD1String " + screenBrightnessLevelPD1String + " screenBrightnessLevelPD2String " + screenBrightnessLevelPD2String);
+                        screenBrightnessLevelPD1 = Double.parseDouble(screenBrightnessLevelPD1String);
+                        screenBrightnessLevelPD2 = Double.parseDouble(screenBrightnessLevelPD2String);
+                        screenBrightnessCombo = "" + screenBrightnessLevelPD1String + "_" + screenBrightnessLevelPD2String;
+                        isPhotoDiode1Working = Boolean.parseBoolean(data.split(" ")[3]);
+                        isPhotoDiode2Working = Boolean.parseBoolean(data.split(" ")[4]);
+                        Log.e("DISPLAY_STATUS", "displayStatusFromHMD " + displayStatusFromHMD + " isPhotoDiode1Working " + isPhotoDiode1Working + " isPhotoDiode2Working "
+                                + isPhotoDiode2Working + " screenBrightnessLevelPD1 " + screenBrightnessLevelPD1 + " screenBrightnessLevelPD2 " + screenBrightnessLevelPD2);
+                        if (displayStatusFromHMD.equalsIgnoreCase("SENSOR_WORKING")) {
+                            if (screenBrightnessLevelPD1 >= 100 && screenBrightnessLevelPD2 >= 100) {
+                                displayStatus = DisplayStatus.DISPLAY_OK;
+                                if (!isDisplayStatusUpdated)
+                                    lastFiveDisplayStatus.add("DISPLAY_OK");
+                                isDisplayStatusUpdated = true;
+                                Log.e("lastFiveDisplayStatus", "after adding " + lastFiveDisplayStatus.size());
+                            } else {
+                                displayStatus = DisplayStatus.DISPLAY_NOT_OK;
+                                if (!isDisplayStatusUpdated)
+                                    lastFiveDisplayStatus.add("DISPLAY_NOT_OK");
+                                isDisplayStatusUpdated = true;
+                                FirebaseCrashlytics.getInstance().recordException(new ScreenBrightnessException("PDR1_PDR2 " + screenBrightnessCombo));
+                                CommonUtils.sendAnalytics(MyApplication.getInstance(), screenBrightnessLevelPD1String, screenBrightnessLevelPD2String);
+                                Log.e("lastFiveDisplayStatus", "after adding " + lastFiveDisplayStatus.size());
+                            }
+                        } else if (displayStatusFromHMD.equalsIgnoreCase("SENSOR_NOT_WORKING")) {
+                            displayStatus = DisplayStatus.DISPLAY_NOT_OK;
+                            if (!isDisplayStatusUpdated)
+                                lastFiveDisplayStatus.add("DISPLAY_NOT_OK");
+                            isDisplayStatusUpdated = true;
+                            FirebaseCrashlytics.getInstance().recordException(new ScreenBrightnessException("DISPLAY_NOT_OK PDR1_PDR2 " + screenBrightnessCombo));
+                            CommonUtils.sendAnalytics(MyApplication.getInstance(), screenBrightnessLevelPD1String, screenBrightnessLevelPD2String);
+                            Log.e("lastFiveDisplayStatus", "after adding " + lastFiveDisplayStatus.size());
+                        }
+                        String jsonText = gson.toJson(lastFiveDisplayStatus);
+                        devicePreferencesHelper.setLastFiveDisplayStatusString(jsonText);
 
-                    accessoriesChecked = "Display";
-                    displayStatusFromHMD = (data.split(" ")[0]);
-                    screenBrightnessLevelPD1String = data.split(" ")[1];
-                    screenBrightnessLevelPD2String = data.split(" ")[2];
-                    Log.e("DISPLAY_STATUS", " screenBrightnessLevelPD1String " + screenBrightnessLevelPD1String + " screenBrightnessLevelPD2String " + screenBrightnessLevelPD2String);
-                    screenBrightnessLevelPD1 = Double.parseDouble(screenBrightnessLevelPD1String);
-                    screenBrightnessLevelPD2 = Double.parseDouble(screenBrightnessLevelPD2String);
-                    screenBrightnessCombo = "" + screenBrightnessLevelPD1String + "_" + screenBrightnessLevelPD2String;
-                    isPhotoDiode1Working = Boolean.parseBoolean(data.split(" ")[3]);
-                    isPhotoDiode2Working = Boolean.parseBoolean(data.split(" ")[4]);
-                    Log.e("DISPLAY_STATUS", "displayStatusFromHMD " + displayStatusFromHMD + " isPhotoDiode1Working " + isPhotoDiode1Working + " isPhotoDiode2Working "
-                            + isPhotoDiode2Working + " screenBrightnessLevelPD1 " + screenBrightnessLevelPD1 + " screenBrightnessLevelPD2 " + screenBrightnessLevelPD2);
-                    if (displayStatusFromHMD.equalsIgnoreCase("SENSOR_WORKING")) {
-                        if (screenBrightnessLevelPD1 >= 100 && screenBrightnessLevelPD2 >= 100) {
-                            displayStatus = DisplayStatus.DISPLAY_OK;
-                            lastFiveDisplayStatus.add("DISPLAY_OK");
-                            Log.e("lastFiveSize", "after adding " + lastFiveDisplayStatus.size());
-                        } else {
+                        if (activeView_number == R.layout.activity_waitscreen_accessory_status) {
+                            if (displayStatus == DisplayStatus.DISPLAY_OK && clickerStatus == ClickerStatus.CLICKER_OK
+                                    && eyeTrackingStatus == EyeTrackingStatus.EYE_TRACKING_OK)
+                                Actions.beginTestProfile();
+                            else
+                                Actions.showAccessoryStatus();
+                        }
+                    } else {
+                        String lastFiveStatuses = devicePreferencesHelper.getLastFiveDisplayStatusString();
+                        if (lastFiveStatuses != null) {
+                            String[] text = gson.fromJson(lastFiveStatuses, String[].class);
+                            List<String> statuses = Arrays.asList(text);
+                            for (String e : statuses) {
+                                Log.e("Statuses", "" + e);
+                            }
+                            lastFiveDisplayStatus.addAll(statuses);
+                        }
+
+                        accessoriesChecked = "Display";
+                        displayStatusFromHMD = (data.split(" ")[0]);
+                        screenBrightnessLevelPD1String = data.split(" ")[1];
+                        screenBrightnessLevelPD2String = data.split(" ")[2];
+                        Log.e("DISPLAY_STATUS", " screenBrightnessLevelPD1String " + screenBrightnessLevelPD1String + " screenBrightnessLevelPD2String " + screenBrightnessLevelPD2String);
+                        screenBrightnessLevelPD1 = Double.parseDouble(screenBrightnessLevelPD1String);
+                        screenBrightnessLevelPD2 = Double.parseDouble(screenBrightnessLevelPD2String);
+                        screenBrightnessCombo = "" + screenBrightnessLevelPD1String + "_" + screenBrightnessLevelPD2String;
+                        isPhotoDiode1Working = Boolean.parseBoolean(data.split(" ")[3]);
+                        isPhotoDiode2Working = Boolean.parseBoolean(data.split(" ")[4]);
+                        Log.e("DISPLAY_STATUS", "displayStatusFromHMD " + displayStatusFromHMD + " isPhotoDiode1Working " + isPhotoDiode1Working + " isPhotoDiode2Working "
+                                + isPhotoDiode2Working + " screenBrightnessLevelPD1 " + screenBrightnessLevelPD1 + " screenBrightnessLevelPD2 " + screenBrightnessLevelPD2);
+                        if (displayStatusFromHMD.equalsIgnoreCase("SENSOR_WORKING")) {
+                            if (screenBrightnessLevelPD1 >= 100 && screenBrightnessLevelPD2 >= 100) {
+                                displayStatus = DisplayStatus.DISPLAY_OK;
+                                lastFiveDisplayStatus.add("DISPLAY_OK");
+                                Log.e("lastFiveSize", "after adding " + lastFiveDisplayStatus.size());
+                            } else {
+                                displayStatus = DisplayStatus.DISPLAY_NOT_OK;
+                                lastFiveDisplayStatus.add("DISPLAY_NOT_OK");
+                                FirebaseCrashlytics.getInstance().recordException(new ScreenBrightnessException("PDR1_PDR2 " + screenBrightnessCombo));
+                                CommonUtils.sendAnalytics(MyApplication.getInstance(), screenBrightnessLevelPD1String, screenBrightnessLevelPD2String);
+                                Log.e("lastFiveSize", "after adding " + lastFiveDisplayStatus.size());
+                            }
+                        } else if (displayStatusFromHMD.equalsIgnoreCase("SENSOR_NOT_WORKING")) {
                             displayStatus = DisplayStatus.DISPLAY_NOT_OK;
                             lastFiveDisplayStatus.add("DISPLAY_NOT_OK");
-                            FirebaseCrashlytics.getInstance().recordException(new ScreenBrightnessException("PDR1_PDR2 " + screenBrightnessCombo));
+                            FirebaseCrashlytics.getInstance().recordException(new ScreenBrightnessException("DISPLAY_NOT_OK PDR1_PDR2 " + screenBrightnessCombo));
                             CommonUtils.sendAnalytics(MyApplication.getInstance(), screenBrightnessLevelPD1String, screenBrightnessLevelPD2String);
                             Log.e("lastFiveSize", "after adding " + lastFiveDisplayStatus.size());
                         }
-                    } else if (displayStatusFromHMD.equalsIgnoreCase("SENSOR_NOT_WORKING")) {
-                        displayStatus = DisplayStatus.DISPLAY_NOT_OK;
-                        lastFiveDisplayStatus.add("DISPLAY_NOT_OK");
-                        FirebaseCrashlytics.getInstance().recordException(new ScreenBrightnessException("DISPLAY_NOT_OK PDR1_PDR2 " + screenBrightnessCombo));
-                        CommonUtils.sendAnalytics(MyApplication.getInstance(), screenBrightnessLevelPD1String, screenBrightnessLevelPD2String);
-                        Log.e("lastFiveSize", "after adding " + lastFiveDisplayStatus.size());
-                    }
-                    String jsonText = gson.toJson(lastFiveDisplayStatus);
-                    devicePreferencesHelper.setLastFiveDisplayStatusString(jsonText);
+                        String jsonText = gson.toJson(lastFiveDisplayStatus);
+                        devicePreferencesHelper.setLastFiveDisplayStatusString(jsonText);
 
-                    if (activeView_number == R.layout.activity_waitscreen_accessory_status) {
-                        if (displayStatus == DisplayStatus.DISPLAY_OK && clickerStatus == ClickerStatus.CLICKER_OK
-                                && eyeTrackingStatus == EyeTrackingStatus.EYE_TRACKING_OK)
-                            Actions.beginTestProfile();
-                        else
-                            Actions.showAccessoryStatus();
+                        if (activeView_number == R.layout.activity_waitscreen_accessory_status) {
+                            if (displayStatus == DisplayStatus.DISPLAY_OK && clickerStatus == ClickerStatus.CLICKER_OK
+                                    && eyeTrackingStatus == EyeTrackingStatus.EYE_TRACKING_OK)
+                                Actions.beginTestProfile();
+                            else
+                                Actions.showAccessoryStatus();
+                        }
                     }
                     break;
 
@@ -3244,7 +3326,15 @@ public class Store {
     }
 
     public static boolean isAllLastFiveDisplayStatusAreOkay() {
-        if (lastFiveDisplayStatus.isFull())
+        int i = 0;
+        for (String s : lastFiveDisplayStatus) {
+            Log.e("LastFiveDisplayStatus", "Values " + i + " at " + s);
+            i++;
+        }
+        Log.e("LastFiveDisplayStatus", "isFull " + lastFiveDisplayStatus.isFull());
+        Log.e("LastFiveDisplayStatus", "isAtFullCapacity " + lastFiveDisplayStatus.isAtFullCapacity());
+        Log.e("LastFiveDisplayStatus", "contains " + lastFiveDisplayStatus.contains("DISPLAY_OK"));
+        if (lastFiveDisplayStatus.isAtFullCapacity())
             return lastFiveDisplayStatus.contains("DISPLAY_OK");
         else
             return true;

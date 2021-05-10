@@ -2609,7 +2609,14 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                         accessoryCheckOkay.setVisibility(View.VISIBLE);
                         accessory_error_cardView.setVisibility(View.VISIBLE);
                         accessory_error_textView.setText("Error Code: " + errorCode + " Message from PD " + pd1Message + "_" + pd2Message + "\n" + getResources().getString(R.string.contact_customer_care));
-                    } else {
+                    } else if(errorCode.equalsIgnoreCase("1_003")){
+                        accessory_error_cardView.setVisibility(View.VISIBLE);
+                        accessory_error_textView.setText("Error Code: " + errorCode + " Message from PD " + pd1Message + "_" + pd2Message + "\n" + getResources().getString(R.string.contact_customer_care));
+
+                        accessoryCheckOkay.setVisibility(View.INVISIBLE);
+                        accessoryContactSupport.setVisibility(View.INVISIBLE);
+                        accessoryAbortTest.setVisibility(View.VISIBLE);
+                    }else {
                         accessory_error_cardView.setVisibility(View.VISIBLE);
                         accessory_error_textView.setText("Error Code: " + errorCode + " Message from PD " + pd1Message + "_" + pd2Message + "\n" + getResources().getString(R.string.contact_customer_care));
 
@@ -3533,6 +3540,10 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
 
     private String decideErrorCode() {
         int id = decideDisplayStatusMessage();
+        if (clickerStatus == ClickerStatus.CLICKER_OK && eyeTrackingStatus == EyeTrackingStatus.EYE_TRACKING_OK
+                && id == R.string.display_out_of_limits) {
+            return "1_003";
+        }
         if (clickerStatus == ClickerStatus.CLICKER_OK && eyeTrackingStatus == EyeTrackingStatus.EYE_TRACKING_OK
                 && id == R.string.display_okay) {
             return "All_set";
