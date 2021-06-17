@@ -2613,13 +2613,13 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                         accessory_error_cardView.setVisibility(View.VISIBLE);
                         accessory_error_textView.setText("Error Code: " + errorCode + " Message from PD " + pd1Message + "_" + pd2Message + "\n" + getResources().getString(R.string.contact_customer_care));
 
-                       // accessoryCheckOkay.setVisibility(View.INVISIBLE);
-                       // accessoryContactSupport.setVisibility(View.INVISIBLE);
-                       // accessoryAbortTest.setVisibility(View.VISIBLE);
+                        accessoryCheckOkay.setVisibility(View.INVISIBLE);
+                        accessoryContactSupport.setVisibility(View.INVISIBLE);
+                        accessoryAbortTest.setVisibility(View.VISIBLE);
 
-                        accessoryCheckOkay.setText("Proceed Anyway");
-                        accessoryCheckOkay.setVisibility(View.VISIBLE);
-                        accessory_error_cardView.setVisibility(View.VISIBLE);
+                       // accessoryCheckOkay.setText("Proceed Anyway");
+                       // accessoryCheckOkay.setVisibility(View.VISIBLE);
+                       // accessory_error_cardView.setVisibility(View.VISIBLE);
                     }else {
                         accessory_error_cardView.setVisibility(View.VISIBLE);
                         accessory_error_textView.setText("Error Code: " + errorCode + " Message from PD " + pd1Message + "_" + pd2Message + "\n" + getResources().getString(R.string.contact_customer_care));
