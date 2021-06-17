@@ -112,6 +112,16 @@ public class GetResultData extends AsyncTask<String, String, Bundle> {
             bundle.putInt("FN_Numerator", FN_Numerator);
             bundle.putInt("FN_Denominator", FN_Denominator);
 
+            Log.e("Relaibility Bug atTCbg", "FL_Numerator" + FL_Numerator);
+            Log.e("Relaibility Bug atTCbg", "FL_Denominator" + FL_Denominator);
+            Log.e("Relaibility Bug atTCbg", "FP_Numerator" + FP_Numerator);
+            Log.e("Relaibility Bug atTCbg", "FP_Denominator" + FP_Denominator);
+            Log.e("Relaibility Bug atTCbg", "FN_Numerator" + FN_Numerator);
+            Log.e("Relaibility Bug atTCbg", "FN_Denominator" + FN_Denominator);
+
+
+
+
             if (finalPerimetryTestFinalResultObject.TestResultsInfo.ResultNormalSequence.GlobalDeviationProbabilityNormalsFlag.equalsIgnoreCase("yes")) {
 
                /* bundle.putString("GHT", finalPerimetryTestFinalResultObject.TestResultsInfo.VisualFieldGlobalResultsIndexSequence[0].DataObservationSequence.TextValue);

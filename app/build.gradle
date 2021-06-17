@@ -50,6 +50,8 @@ android {
             buildConfigField "boolean", "DEV_BUILD", "false"
             buildConfigField "boolean", "DEV_BUILD", "false"
             buildConfigField "boolean", "IN21_012_PRB_Status", "true"
+            buildConfigField "boolean", " IN21_011_IPD_Button_Status", "true"
+            buildConfigField "boolean", " IN21_011_Saving_Pupil_Images", "true"
             signingConfig signingConfigs.release
         }
         debug {
@@ -62,6 +64,8 @@ android {
             buildConfigField "boolean", "ACTIVATE_KIOSK", "false"
             buildConfigField "boolean", "DEV_BUILD", "true"
             buildConfigField "boolean", "IN21_012_PRB_Status", "true"
+            buildConfigField "boolean", " IN21_011_IPD_Button_Status", "true"
+            buildConfigField "boolean", " IN21_011_Saving_Pupil_Images", "true"
             signingConfig signingConfigs.debug
             manifestPlaceholders = [:]
             resValue("string", "PORT_NUMBER", "8081")
@@ -89,7 +93,7 @@ private String generateVersionName() {
         versionName += "-" + rootProject.ext.versionClassifier
     }*/
     String versionClassifier = "Oct30"
-    String versionName = "2.2.7-I"
+    String versionName = "2.2.10-V1"
 
     if (versionClassifier != null) {
         //versionName += "-" + versionClassifier
@@ -122,7 +126,7 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
     implementation 'com.google.firebase:firebase-analytics:18.0.0'
-    implementation 'com.google.firebase:firebase-auth:20.0.0'
+    implementation 'com.google.firebase:firebase-auth:20.0.3'
 
     implementation 'com.amitshekhar.android:android-networking:1.0.2'
     implementation 'com.mindorks.android:prdownloader:0.4.0'

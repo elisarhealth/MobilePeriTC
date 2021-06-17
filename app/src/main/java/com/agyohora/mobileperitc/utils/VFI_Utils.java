@@ -51,6 +51,16 @@ public final class VFI_Utils {
             case "Elisar Zest*":
                 pattern_stratNumber = pattern_stratNumber + 3;
                 break;
+            case "Custom Zest":
+                pattern_stratNumber = pattern_stratNumber + 3;
+                break;
+            case "Custom FT":
+                pattern_stratNumber = pattern_stratNumber + 2;
+                break;
+            case "Custom Fast":
+                pattern_stratNumber = pattern_stratNumber + 4;
+                break;
+
         }
         return pattern_stratNumber;
     }

@@ -12,6 +12,7 @@ public class RuntimeChecker {
         public static int patAge = 0;
         public static int IPDVal = 0;
         public static boolean isItJARVIS = false;
+
     }
 
     public static class RuntimeStatus {

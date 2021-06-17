@@ -2613,9 +2613,13 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                         accessory_error_cardView.setVisibility(View.VISIBLE);
                         accessory_error_textView.setText("Error Code: " + errorCode + " Message from PD " + pd1Message + "_" + pd2Message + "\n" + getResources().getString(R.string.contact_customer_care));
 
-                        accessoryCheckOkay.setVisibility(View.INVISIBLE);
-                        accessoryContactSupport.setVisibility(View.INVISIBLE);
-                        accessoryAbortTest.setVisibility(View.VISIBLE);
+                       // accessoryCheckOkay.setVisibility(View.INVISIBLE);
+                       // accessoryContactSupport.setVisibility(View.INVISIBLE);
+                       // accessoryAbortTest.setVisibility(View.VISIBLE);
+
+                        accessoryCheckOkay.setText("Proceed Anyway");
+                        accessoryCheckOkay.setVisibility(View.VISIBLE);
+                        accessory_error_cardView.setVisibility(View.VISIBLE);
                     }else {
                         accessory_error_cardView.setVisibility(View.VISIBLE);
                         accessory_error_textView.setText("Error Code: " + errorCode + " Message from PD " + pd1Message + "_" + pd2Message + "\n" + getResources().getString(R.string.contact_customer_care));
@@ -2916,6 +2920,11 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                         showToast(state.getString("toastMessage"));
                         Actions.resetToast();
                     }
+                    if (state.getString("ipd_button_status").equals("Visible")) {
+                        findViewById(R.id.ipd_settings_continue_continue_button).setVisibility(View.VISIBLE);
+                    }else {
+                        findViewById(R.id.ipd_settings_continue_continue_button).setVisibility(View.INVISIBLE);
+                    }
                     break;
                 case R.layout.activity_pre_production:
                     TextView calibData = findViewById(R.id.calibDetails);
@@ -3093,6 +3102,9 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                     ((TextView) findViewById(R.id.false_positive_textview)).setText(state.getString("FP"));
                     ((TextView) findViewById(R.id.false_negative_textview)).setText(state.getString("FN"));
                     Log.e("activity_during_test", "activity_during_test already linked " + testImageViewLinked);
+                    Log.e("Relaibility Bug", "FL List " + state.getString("FL"));
+                    Log.e("Relaibility Bug", "FN List " + state.getString("FN"));
+                    Log.e("Relaibility Bug", "FP List " + state.getString("FP"));
                     if (!testImageViewLinked) {
                         DT_Image_Update_Thread = new Thread(duringTest_ImageView_Runnable);
                         Log.d("VideoLoop", "this is starting again");

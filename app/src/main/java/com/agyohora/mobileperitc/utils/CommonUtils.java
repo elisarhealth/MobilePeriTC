@@ -1690,6 +1690,15 @@ public final class CommonUtils {
         }
     }
 
+    public static String getZipFilePath() {
+        try {
+            JSONObject config = CommonUtils.readConfig("Doctor Copy Fragment");
+            return config.getString("DeviceId") + "/Images/" + getCurrentTime() + ".zip";
+        } catch (Exception e) {
+            return "/MismatchedPatientData/" + getCurrentTime() + ".txt";
+        }
+    }
+
     public static View getTD_Plot(Activity activity, String eye, final ArrayList<String> coordinates, final ArrayList<String> pointValues, final ArrayList<String> result_deviation) {
         Log.d("getMappedViewLargeText", "Eye " + eye);
 
@@ -1870,6 +1879,36 @@ public final class CommonUtils {
             Log.d("SaveImage", "IOException " + e.getMessage());
         }
     }
+
+    public static void writeToImageLogsFor21(String filename, Bitmap bitmap) {
+        Log.e("writeToImageLogs", "Called");
+        File dir = new File(Constants.AVA_IMG_FOLDER);
+        if (!dir.exists()) {
+            Log.e("writeToImageLogs", "directory not exists creating one");
+            boolean mkdirs = dir.mkdirs();
+            Log.e("writeToImageLogs", "mkdirs " + mkdirs);
+        } else {
+            Log.e("writeToImageLogs", "directory already exists");
+        }
+        File logFile = new File(dir.getAbsolutePath(), filename + ".jpg");
+        if (!logFile.exists()) {
+            try {
+                Log.e("writeToImageLogs", "Image File Not exists");
+                logFile.createNewFile();
+            } catch (IOException e) {
+                Log.e("Exception", "WriteToLogFile " + e.getMessage());
+            }
+        }
+        try {
+            FileOutputStream out = new FileOutputStream(logFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            Log.e("Exception", "WriteToLogFile" + e.getMessage());
+        }
+    }
+
 
     public static void writeToTotalDeviationFile(String string) {
         //string = string + "  " + getCurrentTime();

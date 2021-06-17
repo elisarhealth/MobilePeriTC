@@ -24,6 +24,7 @@ import com.agyohora.mobileperitc.BuildConfig;
 import com.agyohora.mobileperitc.R;
 import com.agyohora.mobileperitc.actions.Actions;
 import com.agyohora.mobileperitc.asynctasks.InsertRecordIntoDb;
+import com.agyohora.mobileperitc.communication.CommunicationService;
 import com.agyohora.mobileperitc.communication.WifiCommunicationManager;
 import com.agyohora.mobileperitc.data.database.AppDatabase;
 import com.agyohora.mobileperitc.data.database.DatabaseInitializer;
@@ -53,10 +54,12 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static android.content.Context.BATTERY_SERVICE;
 import static com.agyohora.mobileperitc.actions.Actions.abortTest;
@@ -86,6 +89,7 @@ import static com.agyohora.mobileperitc.utils.HmdBatteryStatus.BATTERY_LOW_KEEP_
 import static com.agyohora.mobileperitc.utils.HmdBatteryStatus.BATTERY_LOW_PLEASE_CHARGE_HMD;
 import static com.agyohora.mobileperitc.utils.HmdBatteryStatus.BATTERY_OK;
 import static com.agyohora.mobileperitc.utils.HmdBatteryStatus.PLUG_OUT_CHARGE_OK;
+import static com.google.common.base.Predicates.not;
 
 /**
  * Created by namputo on 09/06/17.
@@ -157,6 +161,7 @@ public class Store {
     private static String setPatientDOBVal = null;
     private static String setPatientSexVal = "";
     private static String setPatientTestEyeVal = "Left Eye";
+    private static String IPD_button_Visiblity = "Not_Visibile";
     private static String setPatientTestPatternVal = "Select test pattern";
     private static String setPatientTestStrategyVal = "Select test strategy";
     private static String setTestSphericalVal = null;
@@ -173,6 +178,7 @@ public class Store {
     private static ArrayList<String> dt_new_result = new ArrayList<>();
     private static ArrayList<String> dt_result_sensitivity = new ArrayList<>();
     private static ArrayList<String> dt_result_seen = new ArrayList<>();
+    private static ArrayList<String> dt_result_seen_temp = new ArrayList<>();
     private static ArrayList<String> dt_result_deviation = new ArrayList<>();
     private static ArrayList<String> dt_result_probabilityDeviationValue = new ArrayList<>();
     private static ArrayList<String> dt_result_generalizedDefectCorrectedSensitivityDeviationValue = new ArrayList<>();
@@ -203,6 +209,7 @@ public class Store {
     private static String sentData;
     private static Bundle clickData = new Bundle();
     static AlertDialog alert;
+    private static String imageFileName = "DUMMY";
     private static Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT)
             .serializeSpecialFloatingPointValues()
             .create();
@@ -1904,6 +1911,13 @@ public class Store {
                         StoreTransmitter.updatedUIState("START_CALIB");
                     }
                     break;
+                case "IPD_BUTTON_STATUS":
+                    Log.d("InTag", "IPD_BUTTON_STATUS");
+                    if (activeView_number == R.layout.activity_ipd_settings) {
+                        IPD_button_Visiblity = data;
+                        StoreTransmitter.updatedUIState("IPD_BUTTON_STATUS");
+                    }
+                    break;
                 case "HMD_SHUT_DOWN":
                     Log.e("HMD_SHUT_DOWN", "Called");
                     Actions.HMDNotConnected();
@@ -2067,6 +2081,7 @@ public class Store {
                     dt_result_sensitivity.clear();
                     dt_result_seen.clear();
 
+
                     setPatientName = appPreferencesHelper.getPatientFirstName();
                     setPatientSexVal = finalPerimetryTestResultObject.Patient.PatientSex;
                     setPatientDOBVal = finalPerimetryTestResultObject.Patient.PatientBirthDate;
@@ -2090,6 +2105,14 @@ public class Store {
                     FN_Denominator = finalPerimetryTestResultObject.Measurements.VisualFieldStaticPerimetryTestReliability.VisualFieldCatchTrialSequence.NegativeCatchTrialsQuantity;
                     FN_Numerator = finalPerimetryTestResultObject.Measurements.VisualFieldStaticPerimetryTestReliability.VisualFieldCatchTrialSequence.FalseNegativesQuantity;
 
+                    Log.e("Relaibility BugTCResult", "FL_Denominator" + FL_Denominator);
+                    Log.e("Relaibility BugTCResult", "FL_Numerator" + FL_Numerator);
+                    Log.e("Relaibility BugTCResult", "FP_Denominator" + FP_Denominator);
+                    Log.e("Relaibility BugTCResult", "FP_Numerator" + FP_Numerator);
+                    Log.e("Relaibility BugTCResult", "FN_Denominator" + FN_Denominator);
+                    Log.e("Relaibility BugTCResult", "FN_Numerator" + FN_Numerator);
+
+
                     for (int i = 0; i < dt_new_result_length; i++) {
                         String xVal, yval, xyval;
                         int x = (int) finalPerimetryTestResultObject.Measurements.VisualFieldStaticPerimetryTestMeasurements.VisualFieldTestPointSequence[i].VisualFieldTestPointXCoordinate;
@@ -2111,6 +2134,19 @@ public class Store {
                             dt_result_sensitivity.add("" + s);
                             dt_result_seen.add(seen);
                         }
+                    }
+                    dt_result_seen_temp = dt_result_seen;
+                    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1 && BuildConfig.IN21_011_Saving_Pupil_Images && (setPatientTestStrategyVal.equals("Custom Zest") || setPatientTestStrategyVal.equals("Custom FT") || setPatientTestStrategyVal.equals("Custom Fast"))) {
+                      /*  List<String> result = listB.stream()
+                                .filter(not(new HashSet<>(listA)::contains))
+                                .collect(Collectors.toList());*/
+
+                        List<String> result = new ArrayList(dt_new_result);
+                        result.removeAll(new HashSet<>(dt_result_seen_temp));
+
+                        imageFileName = CommonUtils.getCurrentDateTimeAsFileName(patientMrnNumberVal, patientTestEyeVal, patientTestPatternVal, patientTestStrategyVal);
+                        CommonUtils.writeToImageLogsFor21(imageFileName + "_" + result.get(0), CommunicationService.videoFrame);
+
                     }
                     if (activeView_number != R.layout.activity_during_test && !isAbortClicked)
                         activeView_number = R.layout.activity_during_test;
@@ -2395,6 +2431,11 @@ public class Store {
 
             case R.layout.activity_ipd_settings:
                 stateBundle.putString("SetPatientTestEye", setPatientTestEyeVal);
+                if (setPatientTestStrategyVal.equals("Custom Zest") || setPatientTestStrategyVal.equals("Custom FT") || setPatientTestStrategyVal.equals("Custom Fast"))
+                    stateBundle.putString("ipd_button_status", IPD_button_Visiblity);
+                else
+                    stateBundle.putString("ipd_button_status", "Visible");
+                //stateBundle.putString("ipd_button_status", "Visible");
                 break;
 
             case R.layout.activity_during_test:

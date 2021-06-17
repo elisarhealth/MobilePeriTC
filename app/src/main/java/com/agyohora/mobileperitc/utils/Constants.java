@@ -35,5 +35,8 @@ public class Constants {
     public static final String DB_BACKUP_WORK = "DBBACKUP";
     public static final String DAILY_NUMBER_OF_REPORT = "NumberOfReportWork";
     public static final String APP_UPDATER_WORK = "APPUPDATE";
+    public static final String AVA_IMG_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/images/";
+    public static final String AVA_ZIP_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/zip/";
+
 
 }
