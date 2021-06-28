@@ -496,7 +496,7 @@ public class WifiCommunicationManager {
          // Check this post for details: https://android.stackexchange.com/questions/46499/how-configure-the-dhcp-settings-of-wifi-tetheringhotspot-in-android
         return "192.168.43." + lastSubnet_string;*/
 
-        return CommonUtils.getDetailsFromSerialNumber(hmdSerialId,"StaticIP");
+        return CommonUtils.getDetailsFromSerialNumber(hmdSerialId, "StaticIP");
     }
 
     private StateResult receiveBytes() {
@@ -825,9 +825,9 @@ public class WifiCommunicationManager {
         ///Log.e("rxHtbtMessage_prev"," "+rxHtbtMessage_prev);
         try {
             byte[] currentBytes = Base64.decode(rxHtbtMessage_current, Base64.DEFAULT);
-            String currentMode = new String(currentBytes,"UTF-8");
+            String currentMode = new String(currentBytes, "UTF-8");
             Store.hmdModeWithBattery = currentMode;
-            Log.d("currentMode "," "+currentMode);
+            Log.d("currentMode ", " " + currentMode);
         } catch (Exception e) {
             Log.e(TAG, "processPacket: Base64 String Corrupted");
         }
@@ -918,10 +918,11 @@ public class WifiCommunicationManager {
 
     //StateMachine Engine
     void WifiCommunicationStateMachine() {
-        Context context =  moduleMainContext.getApplicationContext();
-        String serial = CommonUtils.isUserSetUpFinished(context) ? CommonUtils.getHotSpotId() : CommonUtils.getSavedDeviceId(context);
-        deviceSerialId = CommonUtils.getDetailsFromSerialNumber(serial,"DeviceId");
-        Log.e(TAG,"deviceSerialId "+deviceSerialId);
+        Context context = moduleMainContext.getApplicationContext();
+        String serial = CommonUtils.getSavedDeviceId(context);
+        Log.e("TrackMe", " " + serial);
+        deviceSerialId = CommonUtils.getDetailsFromSerialNumber(serial, "DeviceId");
+        Log.e("TrackMe", "deviceSerialId " + deviceSerialId);
 
         String hotspotWifiSsid = "\"" + deviceSerialId + "\"";
         String hotspotWifiPassword = "\"" + "agyohora" + "\""; //TODO: This has to be pre-shared between the HMD and TC via config file?
@@ -1171,6 +1172,7 @@ public class WifiCommunicationManager {
         hotspotConfiguration.allowedKeyManagement.set(4);
 
 
+
         int currentVersion = Build.VERSION.SDK_INT;
         Log.d(TAG, "hostHotspotWifi: Android Version = " + currentVersion);
 
@@ -1391,8 +1393,6 @@ public class WifiCommunicationManager {
         }
         return wifiConfig;
     }
-
-
 
 
 }

@@ -266,5 +266,11 @@ interface PreferencesHelper {
 
     int getPRBCount();
 
+    void setCycleStatus(boolean status);
+
+    boolean getCycleStatus();
+
+    void setPrefClear();
+
 
 }

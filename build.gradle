@@ -46,7 +46,7 @@ ext {
     versionMajor = 2
     versionMinor = 2
     versionPatch = 6
-    versionClassifier = "R"
+    versionClassifier = "S"
 
     // Sdk and tools
     minimumSdkVersion = 22

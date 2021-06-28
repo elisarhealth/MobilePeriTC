@@ -156,6 +156,7 @@ import static com.agyohora.mobileperitc.utils.Constants.CHRONOMETER_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.DATABASE_RESTORE_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.DISPLAY_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.MY_DEBUG_LOGS_FOLDER;
+import static com.agyohora.mobileperitc.utils.Constants.SYRMA_FIX_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.SYS_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.TD_LOGS_FOLDER;
 import static com.agyohora.mobileperitc.utils.Constants.TEN_DASH_TWO;
@@ -2293,6 +2294,32 @@ public final class CommonUtils {
         }
     }
 
+    static void deleteFilesInConfig(Context context, String ext) {
+        File dir = new File(Environment.getExternalStorageDirectory(), "AVA/settings/");
+        if (!dir.exists())
+            return;
+        File[] files = dir.listFiles(new GenericExtFilter(ext));
+        for (File file : files) {
+            if (!file.isDirectory()) {
+                boolean result = file.delete();
+                Log.e("deleteFiles", "Deleted:" + result);
+            }
+        }
+    }
+
+    static void deleteFilesInVector(Context context, String ext) {
+        File dir = new File(Environment.getExternalStorageDirectory(), "AVA/vector/");
+        if (!dir.exists())
+            return;
+        File[] files = dir.listFiles(new GenericExtFilter(ext));
+        for (File file : files) {
+            if (!file.isDirectory()) {
+                boolean result = file.delete();
+                Log.e("deleteFiles", "Deleted:" + result);
+            }
+        }
+    }
+
     static Bitmap shrinkBitmap(String file, int width, int height) {
 
         BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
@@ -2885,6 +2912,32 @@ public final class CommonUtils {
         }
     }
 
+    public static void writeToSyrmaLogFile(String string) {
+        string = string + "  " + getCurrentTime();
+        ;
+        File dir = new File(SYRMA_FIX_LOGS_FOLDER);
+        if (!dir.exists())
+            dir.mkdirs();
+        File logFile = new File(dir.getPath(), getCurrentDateAsFileName() + ".txt");
+        if (!logFile.exists()) {
+            try {
+                logFile.createNewFile();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                Log.e("Exception", "WriteToLogFile" + e.getMessage());
+            }
+        }
+        try {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(string);
+            buf.newLine();
+            buf.close();
+        } catch (IOException e) {
+            Log.e(TAG, "writeToLogFile " + e.getMessage());
+        }
+    }
+
     public static void writeToChronometerLogFile(String string) {
         string = string + "  " + getCurrentTime();
         ;
@@ -3155,12 +3208,25 @@ public final class CommonUtils {
 
     }
 
+    public static void finishCycle(Activity activity) {
+        switchOffHotSpot(activity);
+        writeToSyrmaLogFile("Production check for the device id " + CommonUtils.getSavedDeviceId(activity) + " done successfully ");
+        AppPreferencesHelper appPreferencesHelper = new AppPreferencesHelper(activity, DEVICE_PREF);
+        appPreferencesHelper.setCycleStatus(false);
+        appPreferencesHelper.clearPreferences();
+        deleteFiles(activity, ".json");
+        deleteFilesInConfig(activity, ".json");
+        deleteFilesInVector(activity, ".json");
+        activity.finishAndRemoveTask();
+        System.exit(0);
+    }
+
     public static JSONObject readVector() {
         Context context = MyApplication.getInstance();
         String serial = getHotSpotId();
         String outputPath = context.getFilesDir().getAbsolutePath();
         File outputFile;
-        AppPreferencesHelper devicePref = new AppPreferencesHelper(context, DEVICE_PREF);
+        /*AppPreferencesHelper devicePref = new AppPreferencesHelper(context, DEVICE_PREF);
         boolean getStat = devicePref.getProductionTestingStatus();
         if (getStat) {
             outputFile = new File(outputPath, "vector" + serial + ".json");
@@ -3169,7 +3235,14 @@ public final class CommonUtils {
                 outputFile = new File(Environment.getExternalStorageDirectory(), Constants.VECTOR_FILE_PATH + serial + ".json");
             }
         } else
-            outputFile = new File(Environment.getExternalStorageDirectory(), Constants.VECTOR_FILE_PATH + serial + ".json");
+            outputFile = new File(Environment.getExternalStorageDirectory(), Constants.VECTOR_FILE_PATH + serial + ".json");*/
+
+        String vectorFileName = "/vector" + serial + ".json";
+
+        String filesDir = context.getFilesDir().getAbsolutePath();
+
+        outputFile = new File(filesDir, vectorFileName);
+
 
         String line;
         StringBuilder stringBuilder = new StringBuilder();
@@ -3285,6 +3358,65 @@ public final class CommonUtils {
             Log.e("JSonException", " " + e.getMessage());
         }
         return null;
+    }
+
+    public static String isFileExists(String deviceId) {
+        Log.e("isFileExists", "called " + deviceId);
+        File outputFile = new File(Constants.CONFIGS_DIR_PATH + deviceId);
+        Log.e("isFileExists", "outputFile path " + outputFile.getAbsolutePath());
+        if (outputFile.exists() && outputFile.isDirectory()) {
+            File config = new File(outputFile.getAbsolutePath(), "config.json");
+            File vector = new File(outputFile.getAbsolutePath(), "vector" + deviceId + ".json");
+
+            if (config.exists()) {
+                if (vector.exists())
+                    return "success";
+                else
+                    return "Vector file doesn't exist";
+            } else
+                return "Config file doesn't exist";
+        } else {
+            return "Parent directory not exists";
+        }
+
+    }
+
+    public static boolean isConfigDeviceIdSame(String deviceId) {
+        File configFile = new File(Constants.CONFIGS_DIR_PATH + deviceId + "/config.json");
+        String line;
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(configFile));
+
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+
+            bufferedReader.close();
+            JSONObject jsonObject = new JSONObject(stringBuilder.toString());
+            return jsonObject.getString("DeviceId").equals(deviceId);
+        } catch (Exception e) {
+            Log.e("readConfig", "Exception " + e.getMessage());
+            return false;
+        }
+    }
+
+
+    public static boolean copyConfigAndVectorFile(String deviceId, Context context) {
+        File configsPath = new File(Constants.CONFIGS_DIR_PATH + deviceId);
+        String vectorFileName = "/vector" + deviceId + ".json";
+
+        String configFileName = "/config.json";
+
+        String filesDir = context.getFilesDir().getAbsolutePath();
+        File file = new File(Environment.getExternalStorageDirectory(), "AVA/settings/");
+        boolean isVectorFileCopied = CommonUtils.copyFile(configsPath.getAbsolutePath(), vectorFileName, filesDir);
+        boolean isConfigFileCopied = CommonUtils.copyFile(configsPath.getAbsolutePath(), configFileName, filesDir);
+        boolean isConfigFileCopiedToSettings = CommonUtils.copyFile(configsPath.getAbsolutePath(), configFileName, file.getAbsolutePath());
+
+        return isVectorFileCopied && isConfigFileCopied && isConfigFileCopiedToSettings;
+
     }
 
     public static String getVersionName() {

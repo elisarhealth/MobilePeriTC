@@ -64,6 +64,7 @@ import static com.agyohora.mobileperitc.actions.Actions.foveaFeedback;
 import static com.agyohora.mobileperitc.communication.WifiCommunicationManager.isHotspotOn;
 import static com.agyohora.mobileperitc.ui.MainActivity.applicationContext;
 import static com.agyohora.mobileperitc.ui.MainActivity.chronometerForDurationCalculation;
+import static com.agyohora.mobileperitc.ui.MainActivity.dialogReference;
 import static com.agyohora.mobileperitc.ui.MainActivity.isChronometerRunning;
 import static com.agyohora.mobileperitc.ui.MainActivity.timeWhenStopped;
 import static com.agyohora.mobileperitc.utils.AppConstants.DEVICE_PREF;
@@ -112,6 +113,7 @@ public class Store {
     public static int tipId = 0;
     public static int recordsInserted = 0, recordMismatched = 0, recordsDuplicated = 0, totalNumberOfRecords = 0;
     public static boolean showTip = false;
+    public static boolean showProductionCheckAsDone = true;
     public static boolean isCommInitializationOver = false;
     public static boolean communicationActive = false;
     public static boolean isAbortClicked = false;
@@ -599,6 +601,30 @@ public class Store {
                     buttonClickData.buttonData = CommonUtils.readVector().toString();
                 clickData.putString("onPass", "VectorDataPass");
                 clickData.putString("onFail", "VectorDataFail");
+                sentData = gson.toJson(buttonClickData);
+                clickData.putInt("hashcode", sentData.hashCode());
+                clickData.putString("data", sentData);
+                StoreTransmitter.doCommFunction(StoreTransmitter.COMM_FUNCTION_CLICKONTC, clickData);
+                updateBehaviour();
+                // StoreTransmitter.updatedUIState("ACTION_ADJUST_IPD_DETAILS");
+                break;
+            case Actions.ACTION_SAVE_VECTOR_DATA_IN_HMD_AND_GET_FEEDBACK:
+                buttonClickData.buttonName = "Save_Vector_Data_And_Send_Feedback";
+                buttonClickData.buttonData = CommonUtils.readVector().toString();
+                clickData.putString("onPass", "VectorSaveDataPass");
+                clickData.putString("onFail", "VectorSaveDataFail");
+                sentData = gson.toJson(buttonClickData);
+                clickData.putInt("hashcode", sentData.hashCode());
+                clickData.putString("data", sentData);
+                StoreTransmitter.doCommFunction(StoreTransmitter.COMM_FUNCTION_CLICKONTC, clickData);
+                updateBehaviour();
+                // StoreTransmitter.updatedUIState("ACTION_ADJUST_IPD_DETAILS");
+                break;
+            case Actions.ACTION_GET_VECTOR_DATA:
+                buttonClickData.buttonName = "Get_Vector_Data";
+                buttonClickData.buttonData = "Get_Vector_Data";
+                clickData.putString("onPass", "VectorSaveDataPass");
+                clickData.putString("onFail", "VectorSaveDataFail");
                 sentData = gson.toJson(buttonClickData);
                 clickData.putInt("hashcode", sentData.hashCode());
                 clickData.putString("data", sentData);
@@ -1679,6 +1705,20 @@ public class Store {
                         StoreTransmitter.updatedUIState("CLICKER_STATUS");
                     }
                     break;
+                case "VECTOR_DATA_SAVED":
+                    showProductionCheckAsDone = false;
+                    showVectorDataSuccess(dialogReference);
+                    break;
+                case "VECTOR_DATA_NOT_SAVED":
+                    if (activeView_number == R.layout.new_hmd_details_activity) {
+                        showProductionCheckAsDone = true;
+                        StoreTransmitter.updatedUIState("VECTOR_DATA_NOT_SAVED");
+                    }
+                    showVectorDataFailure(dialogReference);
+                    break;
+                case "VECTOR_DATA_FROM_HMD":
+                    Log.e("VECTOR_DATA_FROM_HMD", " " + data);
+                    break;
                 case "DISPLAY_STATUS":
                     String lastFiveStatuses = devicePreferencesHelper.getLastFiveDisplayStatusString();
                     if (lastFiveStatuses != null) {
@@ -2242,6 +2282,9 @@ public class Store {
 
         switch (activeView_number) {
 
+            case R.layout.new_hmd_details_activity:
+                stateBundle.putBoolean("button_visibility", showProductionCheckAsDone);
+                break;
             case R.layout.restore_database_finished:
                 stateBundle.putInt("recordMismatched", recordMismatched);
                 stateBundle.putInt("recordsInserted", recordsInserted);
@@ -2624,6 +2667,35 @@ public class Store {
         alert.show();
     }
 
+    private static void showVectorDataSuccess(Context context) {
+        if (alert != null && alert.isShowing()) {
+            alert.dismiss();
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.myDialog));
+        builder.setTitle("Alert!");
+        builder.setMessage("Vector data sent to HMD. App will be closed now.")
+                .setCancelable(false)
+                .setPositiveButton("Okay", (dialog, id) -> {
+                    CommonUtils.finishCycle(dialogReference);
+                });
+        alert = builder.create();
+        alert.show();
+    }
+
+    private static void showVectorDataFailure(Context context) {
+        if (alert != null && alert.isShowing()) {
+            alert.dismiss();
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.myDialog));
+        builder.setTitle("Alert!");
+        builder.setMessage("Failed to send Vector data to HMD.")
+                .setCancelable(true)
+                .setPositiveButton("Okay", (dialog, id) -> {
+                });
+        alert = builder.create();
+        alert.show();
+    }
+
     private static void showHMDIdleTurnOffWarning(Context context) {
         Log.e("ILDE", "showHMDIdleTurnOffWarning called");
         if (alert != null && alert.isShowing()) {
@@ -2669,7 +2741,7 @@ public class Store {
         builder.setMessage("HMD is turned off for being idle for too long")
                 .setCancelable(false)
                 .setPositiveButton("Okay", (dialog, id) -> {
-                    Actions.showLogOutDecoy();
+                    // Actions.showLogOutDecoy();
                 });
         alert = builder.create();
         alert.show();

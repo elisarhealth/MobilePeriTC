@@ -1239,6 +1239,7 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
 
             case R.id.new_test:
             case R.id.new_test_img:
+                Actions.setActionGetVectorData();
                 Store.isAbortClicked = false;
                 Store.batteryLevel = null;
                 Store.batteryLevelVisibility = false;
@@ -1598,6 +1599,7 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 break;
 
             case R.id.hmd_details:
+                Store.showProductionCheckAsDone = true;
                 Actions.showHmdDetailsScreen();
                 break;
         }
@@ -1646,6 +1648,8 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                 Actions.checkBattery();
                 Actions.beginTestDetails();
             }
+        } else if (devicePreferencesHelper.getCycleStatus()) {
+            Actions.showPreProductionScreen();
         }
     }
 
@@ -1878,50 +1882,12 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                     CommonUtils.showHMDDisconnectedDialog(this);
                 break;
             case R.id.production_test_done:
-                boolean vectorFileStatus = preferencesHelper.getVectorFileCopiedStatus();
-                boolean configFileStatus = preferencesHelper.getConfigFileCopiedStatus();
-                String vectorFileName = "vector" + CommonUtils.getHotSpotId() + ".json";
-                String vectorInputPath = Environment.getExternalStorageDirectory() + Constants.VECTOR_FILE_PATH_ROOT;
-                String vectorOutputPath = getFilesDir().getAbsolutePath();
-                String configFileName = "config.json";
-                String confiInputPath = Environment.getExternalStorageDirectory() + Constants.CONFIG_FILE_PATH_ROOT;
-                String configOutputPath = getFilesDir().getAbsolutePath();
-                boolean isVectorFileCopied = CommonUtils.copyFile(vectorInputPath, vectorFileName, vectorOutputPath);
-                boolean isConfigFileCopied = CommonUtils.copyFile(confiInputPath, configFileName, configOutputPath);
-                if (!configFileStatus) {
-                    if (isConfigFileCopied) {
-                        preferencesHelper.putConfigFileCopiedStatus(true);
-                        CommonUtils.showToasty(this, "Config File Copied Successfully", true, 'I');
-                    } else {
-                        CommonUtils.showToasty(this, "Config File Not Copied", true, 'E');
-                    }
-                }
-                if (!vectorFileStatus) {
-                    if (isVectorFileCopied) {
-                        if (CommonUtils.readVector() != null) {
-                            //if (CommonUtils.deleteDirectory(new File(vectorInputPath, vectorFileName))) {
-                            if (true) {
-                                preferencesHelper.putVectorFileCopiedStatus(true);
-                                CommonUtils.showToasty(this, "Vector File Copied Successfully", true, 'I');
-                            } else {
-                                CommonUtils.showToasty(this, "Vector File in SD card Not deleted Successfully", true, 'W');
-                            }
-                        } else {
-                            CommonUtils.showToasty(this, "Vector File Copied Successfully and error in reading ", true, 'E');
-                        }
-                    } else {
-                        CommonUtils.showToasty(this, "Vector File Not Copied", true, 'E');
-                    }
-                }
 
-                vectorFileStatus = preferencesHelper.getVectorFileCopiedStatus();
-                configFileStatus = preferencesHelper.getConfigFileCopiedStatus();
-
-                if (vectorFileStatus && configFileStatus) {
-                    production_test_done_bar.setVisibility(View.INVISIBLE);
-                    production_test_done.setVisibility(View.INVISIBLE);
-                    preferencesHelper.setProductionTestingStatus(true);
-                }
+                if (communicationActive) {
+                    findViewById(R.id.production_test_done).setVisibility(View.INVISIBLE);
+                    Actions.setActionSaveVectorDataInHmdAndGetFeedback();
+                } else
+                    Toast.makeText(applicationContext, "HMD connection required to do this action", Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -2293,7 +2259,7 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                         hmd_id.setText(CommonUtils.getSavedDeviceId(this));
                         org_id.setText(CommonUtils.getSavedOrgId(this));
                     }
-                    if (!devicePreferenceHelper.getProductionTestingStatus()) {
+                    if (state.getBoolean("button_visibility")) {
                         production_test_done_bar.setVisibility(View.VISIBLE);
                         production_test_done.setVisibility(View.VISIBLE);
                     }

@@ -111,8 +111,8 @@ public class QrResultActivity extends AppCompatActivity {
                     appPreferencesHelper.setOrgId(siteId);
                     CommonUtils.writeToConfigFile(devId, orgName, siteId, configString);
                 }
-                if (!appPreferencesHelper.getProductionSetUpStatus() && Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1)
-                    activeView_number = R.layout.activity_setup_hotspot;
+                if (!appPreferencesHelper.getProductionSetUpStatus() && !appPreferencesHelper.getCycleStatus())
+                    activeView_number = R.layout.activity_home_screen;
                 else
                     activeView_number = R.layout.hmd_sync_check_activity;
                 startActivity(new Intent(this, MainActivity.class));

@@ -1,7 +1,9 @@
 package com.agyohora.mobileperitc.ui;
 
 import android.Manifest;
+import android.app.FragmentTransaction;
 import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +13,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -32,6 +35,7 @@ import com.agyohora.mobileperitc.R;
 import com.agyohora.mobileperitc.data.preferences.AppPreferencesHelper;
 import com.agyohora.mobileperitc.myapplication.MyApplication;
 import com.agyohora.mobileperitc.utils.CommonUtils;
+import com.agyohora.mobileperitc.utils.Constants;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -83,7 +87,7 @@ public class StartScreenActivity extends AppCompatActivity {
         if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
-       // CommonUtils.sendSMS(this);
+        // CommonUtils.sendSMS(this);
     }
 
     @Override
@@ -119,25 +123,25 @@ public class StartScreenActivity extends AppCompatActivity {
                 AppPreferencesHelper appPreferencesHelper = new AppPreferencesHelper(this.getApplicationContext(), DEVICE_PREF);
                 //appPreferencesHelper.setDatabaseVersion(3);
                 //appPreferencesHelper.setDeviceConfigurationStatus(true);
-                if (!appPreferencesHelper.getProductionSetUpStatus())
-                    startBarCodeActivity();
-                else if (!appPreferencesHelper.getUserSetUpStatus()) {
+                if (!appPreferencesHelper.getProductionSetUpStatus() && !appPreferencesHelper.getCycleStatus())
+                    startSyrmaQRActivity();
+                else {
+                   /* Intent intent = new Intent(this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.putExtra("Exit me", true);
+                    startActivity(intent);*/
+                    startMainActivity();
+
+                    // startActivity(new Intent(this, MainActivity.class));
+                }
+               /*  else if (!appPreferencesHelper.getUserSetUpStatus()) {
                     if (appPreferencesHelper.getProductionTestingStatus())
                         showRequirementDialog(this);
                     else
                         startActivity(new Intent(this, MainActivity.class));
                 } else {
-                    /*//Patch for congo
-                    if (!appPreferencesHelper.getOrgSiteUpdateStatus()) {
-                        CommonUtils.changeSiteOrg(this, appPreferencesHelper);
-                    }*/
                     startActivity(new Intent(this, EssentialDataActivity.class));
-                    /*if (!appPreferencesHelper.getLoginStatus()) {
-                        startActivity(new Intent(this, LoginActivity.class));
-                    } else {
-                        startMainActivity();
-                    }*/
-                }
+                }*/
                 break;
             default:
                 Log.d("StartScreenActivity", "No Method Found");
@@ -149,6 +153,7 @@ public class StartScreenActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getApplicationContext().startActivity(intent);
+        finish();
     }
 
     private boolean showWritePermissionSettings() {
@@ -182,7 +187,7 @@ public class StartScreenActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RESULT_FIRST_USER) {
-            startBarCodeActivity();
+            startSyrmaQRActivity();
         } else if (requestCode == MY_PERMISSIONS_MANAGE_WRITE_SETTINGS) {
             if (resultCode == RESULT_OK) {
                 mSettingPermission = true;
@@ -201,23 +206,25 @@ public class StartScreenActivity extends AppCompatActivity {
                     AppPreferencesHelper appPreferencesHelper = new AppPreferencesHelper(this, DEVICE_PREF);
                     if (isQrContainsValidParams(appPreferencesHelper, retrievedData)) {
                         String devId = retrievedData.getString("DeviceId").trim();
-                        String org = appPreferencesHelper.getProductionSetUpStatus() ? retrievedData.getString("OrganizationId").trim() : "";
-                        String msg = appPreferencesHelper.getProductionSetUpStatus() ? "Check device and organization" : "Check device";
                         //String siteId = retrievedData.getString("SiteId").trim();
-                        Log.e("QRSCAN", "Scanned ID " + devId + " id from config " + getHotSpotId());
-                        if (devId.equalsIgnoreCase(getHotSpotId())) {
+                        Log.e("QRSCAN", "Scanned ID " + devId);
+                        String message = CommonUtils.isFileExists(devId);
+                        if (message.equalsIgnoreCase("success")) {
 
-                            Bundle bundle = createBundle(path, msg +
-                                    " information", true, retrievedData);
-                            intent.putExtras(bundle);
-                            startActivityForResult(intent, RESULT_FIRST_USER);
+                            if (CommonUtils.isConfigDeviceIdSame(devId)) {
+                                if (CommonUtils.copyConfigAndVectorFile(devId, this)) {
+                                    appPreferencesHelper.setDeviceId(devId);
+                                    appPreferencesHelper.setCycleStatus(true);
+                                    startActivity(new Intent(this, MainActivity.class));
+                                } else {
+                                    showDialog("Error in copying config and vector file");
+                                }
+                            } else {
+                                showDialog("Config file's device id mismatches with QR device id.");
+                            }
 
                         } else {
-                            Bundle bundle = createBundle(path, "Device or Org Id scanned does not match.\n" +
-                                            "Please contact customer care\n",
-                                    false, retrievedData);
-                            intent.putExtras(bundle);
-                            startActivityForResult(intent, RESULT_FIRST_USER);
+                            showDialog(message);
                         }
 
                     } else {
@@ -279,7 +286,7 @@ public class StartScreenActivity extends AppCompatActivity {
         builder.setTitle("Error!");
         builder.setMessage(message)
                 .setCancelable(true)
-                .setPositiveButton("Retry", (dialog, id) -> startBarCodeActivity())
+                .setPositiveButton("Retry", (dialog, id) -> startSyrmaQRActivity())
                 .setNegativeButton("Cancel", (dialog, id) -> {
                     //do things
                 });
@@ -295,6 +302,17 @@ public class StartScreenActivity extends AppCompatActivity {
         integrator.setBeepEnabled(true);
         integrator.setPrompt("Focus the QR code inside this box");
         integrator.setCaptureActivity(BarCodeCaptureActivity.class);
+        integrator.initiateScan();
+    }
+
+    private void startSyrmaQRActivity() {
+        // new TriggerTheUpgrade().execute();
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setOrientationLocked(false);
+        integrator.setBarcodeImageEnabled(true);
+        integrator.setBeepEnabled(true);
+        integrator.setPrompt("Focus the QR code inside this box");
+        integrator.setCaptureActivity(QrScannerActivity.class);
         integrator.initiateScan();
     }
 
@@ -327,6 +345,18 @@ public class StartScreenActivity extends AppCompatActivity {
             Log.e("CreateBundle", " " + e.getMessage());
             return null;
         }
+    }
+
+    public void showDialog(String result) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.myDialog));
+        builder.setTitle("Alert");
+        builder.setMessage(result)
+                .setCancelable(false)
+                .setPositiveButton("OK", (dialog, id) -> {
+                    //do things
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private void setDefaultAdminPolicies(boolean active) {

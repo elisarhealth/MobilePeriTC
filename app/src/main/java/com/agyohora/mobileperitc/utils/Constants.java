@@ -23,9 +23,11 @@ public class Constants {
 
 
     public static final String BUG_FIX_LOGS_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/bugfix/";
+    public static final String SYRMA_FIX_LOGS_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/syrma/";
     public static final String DATABASE_RESTORE_LOGS_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/database-restore/";
     public static final String CHRONOMETER_LOGS_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/chronometer/bugfix";
     public static final String BUG_FIX_CLICK_ACK_FOLDER = Environment.getExternalStorageDirectory() + "/AVA/logs/bugfix/ack";
+    public static final String CONFIGS_DIR_PATH = Environment.getExternalStorageDirectory() + "/AVA/Configs/";
 
     public static final String CONFIG_FILE_PATH = "AVA/settings/config.json";
     public static final String VECTOR_FILE_PATH = "AVA/vector/vector";

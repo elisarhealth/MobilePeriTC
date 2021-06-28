@@ -100,6 +100,8 @@ public class Actions extends IntentService {
     public static final String ACTION_SEND_VECTOR_DATA = "com.agyohora.mobileperitc.actions.actions.name.send_vector_data";
     public static final String ACTION_UPDATATE_HMD_BATTERY_STATUS = "com.agyohora.mobileperitc.actions.actions.name.hmd_battery_status";
     public static final String ACTION_SAVE_VECTOR_DATA_IN_HMD = "com.agyohora.mobileperitc.actions.actions.name.save_vector_data_in_hmd";
+    public static final String ACTION_SAVE_VECTOR_DATA_IN_HMD_AND_GET_FEEDBACK = "com.agyohora.mobileperitc.actions.actions.name.save_vector_data_in_hmd_and_get_feed_back";
+    public static final String ACTION_GET_VECTOR_DATA = "com.agyohora.mobileperitc.actions.actions.name.get_vector_data";
     public static final String ACTION_GET_PRB_STATUS = "com.agyohora.mobileperitc.actions.actions.name.get_prb_status";
     public static final String ACTION_CALIB_UP = "com.agyohora.mobileperitc.actions.actions.name.calib_up";
     public static final String ACTION_CALIB_DOWN = "com.agyohora.mobileperitc.actions.actions.name.calib_down";
@@ -549,6 +551,18 @@ public class Actions extends IntentService {
 
     public static void setActionSaveVectorDatainHMD() {
         Bundle payload = actionCreator(ACTION_SAVE_VECTOR_DATA_IN_HMD);
+        payload.putString("data", null);
+        fireTheIntent(payload);
+    }
+
+    public static void setActionSaveVectorDataInHmdAndGetFeedback() {
+        Bundle payload = actionCreator(ACTION_SAVE_VECTOR_DATA_IN_HMD_AND_GET_FEEDBACK);
+        payload.putString("data", null);
+        fireTheIntent(payload);
+    }
+
+    public static void setActionGetVectorData() {
+        Bundle payload = actionCreator(ACTION_GET_VECTOR_DATA);
         payload.putString("data", null);
         fireTheIntent(payload);
     }

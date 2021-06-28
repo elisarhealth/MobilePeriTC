@@ -89,6 +89,9 @@ public class AppPreferencesHelper implements PreferencesHelper {
     private static final String PREF_DATABASE_VERSION = "pref_database_versiion";
     private static final String PREF_ORG_UPDATE = "pref_org_update";
     private static final String PREF_PRB_COUNT = "prb_count";
+    private static final String PREF_CYCLE_STATUS = "pref_cycle_status";
+    private static final String PREF_CLEAR = "pref_clear";
+
 
 
     private final SharedPreferences mPrefs;
@@ -745,6 +748,23 @@ public class AppPreferencesHelper implements PreferencesHelper {
     @Override
     public int getPRBCount() {
         return mPrefs.getInt(PREF_PRB_COUNT, 0);
+    }
+
+    @Override
+    public void setCycleStatus(boolean status) {
+        mPrefs.edit().putBoolean(PREF_CYCLE_STATUS, status).apply();
+    }
+
+    @Override
+    public boolean getCycleStatus() {
+        return mPrefs.getBoolean(PREF_CYCLE_STATUS, false);
+    }
+
+    @Override
+    public void setPrefClear() {
+        SharedPreferences.Editor editor =  mPrefs.edit();
+        editor.clear();
+        editor.apply();
     }
 
 }

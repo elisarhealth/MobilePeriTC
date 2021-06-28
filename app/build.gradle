@@ -86,7 +86,7 @@ private String generateVersionName() {
         versionName += "-" + rootProject.ext.versionClassifier
     }*/
     String versionClassifier = "Oct30"
-    String versionName = "2.2.6-R1"
+    String versionName = "2.2.6-S"
 
     if (versionClassifier != null) {
         //versionName += "-" + versionClassifier
