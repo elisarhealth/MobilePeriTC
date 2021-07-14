@@ -60,6 +60,9 @@ public final class VFI_Utils {
             case "Custom Fast":
                 pattern_stratNumber = pattern_stratNumber + 4;
                 break;
+            case "Custom Zest1":
+                pattern_stratNumber = pattern_stratNumber + 3;
+                break;
 
         }
         return pattern_stratNumber;

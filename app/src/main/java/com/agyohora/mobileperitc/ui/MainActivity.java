@@ -2613,13 +2613,13 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                         accessory_error_cardView.setVisibility(View.VISIBLE);
                         accessory_error_textView.setText("Error Code: " + errorCode + " Message from PD " + pd1Message + "_" + pd2Message + "\n" + getResources().getString(R.string.contact_customer_care));
 
-                        accessoryCheckOkay.setVisibility(View.INVISIBLE);
-                        accessoryContactSupport.setVisibility(View.INVISIBLE);
-                        accessoryAbortTest.setVisibility(View.VISIBLE);
+                       // accessoryCheckOkay.setVisibility(View.INVISIBLE);
+                       // accessoryContactSupport.setVisibility(View.INVISIBLE);
+                       // accessoryAbortTest.setVisibility(View.VISIBLE);
 
-                       // accessoryCheckOkay.setText("Proceed Anyway");
-                       // accessoryCheckOkay.setVisibility(View.VISIBLE);
-                       // accessory_error_cardView.setVisibility(View.VISIBLE);
+                        accessoryCheckOkay.setText("Proceed Anyway");
+                        accessoryCheckOkay.setVisibility(View.VISIBLE);
+                        accessory_error_cardView.setVisibility(View.VISIBLE);
                     }else {
                         accessory_error_cardView.setVisibility(View.VISIBLE);
                         accessory_error_textView.setText("Error Code: " + errorCode + " Message from PD " + pd1Message + "_" + pd2Message + "\n" + getResources().getString(R.string.contact_customer_care));
@@ -2920,11 +2920,11 @@ public class MainActivity extends AppCompatActivity implements OnAccountsUpdateL
                         showToast(state.getString("toastMessage"));
                         Actions.resetToast();
                     }
-                    if (state.getString("ipd_button_status").equals("Visible")) {
-                        findViewById(R.id.ipd_settings_continue_continue_button).setVisibility(View.VISIBLE);
-                    }else {
-                        findViewById(R.id.ipd_settings_continue_continue_button).setVisibility(View.INVISIBLE);
-                    }
+                   // if (state.getString("ipd_button_status").equals("Visible")) {
+                       // findViewById(R.id.ipd_settings_continue_continue_button).setVisibility(View.VISIBLE);
+                   // }else {
+                       // findViewById(R.id.ipd_settings_continue_continue_button).setVisibility(View.INVISIBLE);
+                   // }
                     break;
                 case R.layout.activity_pre_production:
                     TextView calibData = findViewById(R.id.calibDetails);

@@ -50,8 +50,8 @@ android {
             buildConfigField "boolean", "DEV_BUILD", "false"
             buildConfigField "boolean", "DEV_BUILD", "false"
             buildConfigField "boolean", "IN21_012_PRB_Status", "true"
-            buildConfigField "boolean", " IN21_011_IPD_Button_Status", "true"
-            buildConfigField "boolean", " IN21_011_Saving_Pupil_Images", "true"
+            buildConfigField "boolean", " IN21_011_IPD_Button_Status", "false"
+            buildConfigField "boolean", " IN21_011_Saving_Pupil_Images", "false"
             signingConfig signingConfigs.release
         }
         debug {
@@ -62,10 +62,10 @@ android {
             buildConfigField("String", "BATCH", "\"ELISAR\"")
             buildConfigField("String", "USER", "\"DEV\"")
             buildConfigField "boolean", "ACTIVATE_KIOSK", "false"
-            buildConfigField "boolean", "DEV_BUILD", "true"
+            buildConfigField "boolean", "DEV_BUILD", "false"
             buildConfigField "boolean", "IN21_012_PRB_Status", "true"
-            buildConfigField "boolean", " IN21_011_IPD_Button_Status", "true"
-            buildConfigField "boolean", " IN21_011_Saving_Pupil_Images", "true"
+            buildConfigField "boolean", "IN21_011_IPD_Button_Status", "false"
+            buildConfigField "boolean", "IN21_011_Saving_Pupil_Images", "false"
             signingConfig signingConfigs.debug
             manifestPlaceholders = [:]
             resValue("string", "PORT_NUMBER", "8081")

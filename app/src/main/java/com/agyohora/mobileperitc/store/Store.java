@@ -161,7 +161,7 @@ public class Store {
     private static String setPatientDOBVal = null;
     private static String setPatientSexVal = "";
     private static String setPatientTestEyeVal = "Left Eye";
-    private static String IPD_button_Visiblity = "Not_Visibile";
+   // private static String IPD_button_Visiblity = "Not_Visibile";
     private static String setPatientTestPatternVal = "Select test pattern";
     private static String setPatientTestStrategyVal = "Select test strategy";
     private static String setTestSphericalVal = null;
@@ -1911,13 +1911,13 @@ public class Store {
                         StoreTransmitter.updatedUIState("START_CALIB");
                     }
                     break;
-                case "IPD_BUTTON_STATUS":
-                    Log.d("InTag", "IPD_BUTTON_STATUS");
-                    if (activeView_number == R.layout.activity_ipd_settings) {
-                        IPD_button_Visiblity = data;
-                        StoreTransmitter.updatedUIState("IPD_BUTTON_STATUS");
-                    }
-                    break;
+               // case "IPD_BUTTON_STATUS":
+                    //Log.d("InTag", "IPD_BUTTON_STATUS");
+                   // if (activeView_number == R.layout.activity_ipd_settings) {
+                       // IPD_button_Visiblity = data;
+                       // StoreTransmitter.updatedUIState("IPD_BUTTON_STATUS");
+                   // }
+                   // break;
                 case "HMD_SHUT_DOWN":
                     Log.e("HMD_SHUT_DOWN", "Called");
                     Actions.HMDNotConnected();
@@ -2136,7 +2136,7 @@ public class Store {
                         }
                     }
                     dt_result_seen_temp = dt_result_seen;
-                    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1 && BuildConfig.IN21_011_Saving_Pupil_Images && (setPatientTestStrategyVal.equals("Custom Zest") || setPatientTestStrategyVal.equals("Custom FT") || setPatientTestStrategyVal.equals("Custom Fast"))) {
+                    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1 && BuildConfig.IN21_011_Saving_Pupil_Images && (setPatientTestStrategyVal.equals("Custom Zest") ||setPatientTestStrategyVal.equals("Custom Zest1")|| setPatientTestStrategyVal.equals("Custom FT") || setPatientTestStrategyVal.equals("Custom Fast"))) {
                       /*  List<String> result = listB.stream()
                                 .filter(not(new HashSet<>(listA)::contains))
                                 .collect(Collectors.toList());*/
@@ -2429,14 +2429,14 @@ public class Store {
                 stateBundle.putString("SetPatientCylindricalAxisValue", setTestCylindricalAxis);
                 break;
 
-            case R.layout.activity_ipd_settings:
-                stateBundle.putString("SetPatientTestEye", setPatientTestEyeVal);
-                if (setPatientTestStrategyVal.equals("Custom Zest") || setPatientTestStrategyVal.equals("Custom FT") || setPatientTestStrategyVal.equals("Custom Fast"))
-                    stateBundle.putString("ipd_button_status", IPD_button_Visiblity);
-                else
-                    stateBundle.putString("ipd_button_status", "Visible");
+           // case R.layout.activity_ipd_settings:
+               // stateBundle.putString("SetPatientTestEye", setPatientTestEyeVal);
+               // if (setPatientTestStrategyVal.equals("Custom Zest") || setPatientTestStrategyVal.equals("Custom FT") || setPatientTestStrategyVal.equals("Custom Fast"))
+                   // stateBundle.putString("ipd_button_status", IPD_button_Visiblity);
+               // else
+                   // stateBundle.putString("ipd_button_status", "Visible");
                 //stateBundle.putString("ipd_button_status", "Visible");
-                break;
+              //  break;
 
             case R.layout.activity_during_test:
 

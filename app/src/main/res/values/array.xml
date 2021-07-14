@@ -22,9 +22,8 @@
         <item>Full Threshold</item>
         <item>Elisar Zest</item>
         <item>Elisar Fast</item>
-        <item>Custom FT</item>
         <item>Custom Zest</item>
-        <item>Custom Fast</item>
+        <item>Custom Zest1</item>
     </array>
 
     <array name="thirty_dash_two_strategies">
@@ -33,9 +32,8 @@
         <item>Full Threshold</item>
         <item>Elisar Zest</item>
         <item>Elisar Fast</item>
-        <item>Custom FT</item>
         <item>Custom Zest</item>
-        <item>Custom Fast</item>
+        <item>Custom Zest1</item>
     </array>
 
     <array name="ten_dash_two_strategies">
